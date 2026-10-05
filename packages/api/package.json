@@ -1,0 +1,34 @@
+{
+  "name": "@mrconfetti-ecommerce/api",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "openapi:verify": "bun src/verify-openapi.ts",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^8.5.0",
+    "@mrconfetti-ecommerce/auth": "workspace:*",
+    "@mrconfetti-ecommerce/db": "workspace:*",
+    "@mrconfetti-ecommerce/env": "workspace:*",
+    "dotenv": "catalog:",
+    "hono": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@mrconfetti-ecommerce/config": "workspace:*",
+    "@vitest/coverage-v8": "catalog:",
+    "@vitest/ui": "catalog:",
+    "jsdom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

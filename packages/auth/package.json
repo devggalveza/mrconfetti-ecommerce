@@ -1,0 +1,29 @@
+{
+  "name": "@mrconfetti-ecommerce/auth",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@better-auth/drizzle-adapter": "1.6.22",
+    "@mrconfetti-ecommerce/db": "workspace:*",
+    "@mrconfetti-ecommerce/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@mrconfetti-ecommerce/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

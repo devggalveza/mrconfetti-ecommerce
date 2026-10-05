@@ -1,0 +1,53 @@
+{
+  "name": "mrconfetti-ecommerce",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ],
+    "catalog": {
+      "dotenv": "^17.4.2",
+      "zod": "^4.6.5",
+      "typescript": "^6.0.3",
+      "@types/bun": "^1.4.2",
+      "hono": "^4.12.27",
+      "better-auth": "1.6.22",
+      "vitest": "4.1.8",
+      "@vitest/ui": "4.1.8",
+      "@vitest/coverage-v8": "4.1.8",
+      "jsdom": "^29.1.1",
+      "@libsql/client": "^0.17.4",
+      "libsql": "^0.5.29"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "dev:web": "turbo -F web dev",
+    "dev:server": "turbo -F server dev",
+    "db:push": "turbo -F @mrconfetti-ecommerce/db db:push",
+    "db:studio": "turbo -F @mrconfetti-ecommerce/db db:studio",
+    "db:generate": "turbo -F @mrconfetti-ecommerce/db db:generate",
+    "db:migrate": "turbo -F @mrconfetti-ecommerce/db db:migrate",
+    "db:local": "turbo -F @mrconfetti-ecommerce/db db:local",
+    "test": "bun run --filter web test && bun run --filter server test && bun run --filter @mrconfetti-ecommerce/api test"
+  },
+  "dependencies": {
+    "@mrconfetti-ecommerce/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@mrconfetti-ecommerce/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "turbo": "2.10.11",
+    "typescript": "catalog:"
+  },
+  "overrides": {
+    "kysely": "0.28.17"
+  },
+  "packageManager": "bun@1.3.13"
+}
