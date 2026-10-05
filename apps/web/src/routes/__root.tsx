@@ -1,3 +1,4 @@
+import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
@@ -7,7 +8,9 @@ import { Toaster } from "@/components/ui/sonner";
 import Header from "../components/header";
 import appCss from "../index.css?url";
 
-export type RouterAppContext = Record<string, never>;
+export type RouterAppContext = {
+  queryClient: QueryClient;
+};
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
