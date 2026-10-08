@@ -441,6 +441,17 @@ Deviations found while building phase 5:
 
 ## Open risks
 
+- **The native review lifecycle is unusable in this environment.** The Pi review facade
+  speaks `contract: gentle-ai.review-integration/v2` with `status/v9` envelopes, while the
+  installed binary (`gentle-ai 4.0.0-20260928233426-d96a5d4f021b`, prerelease) publishes
+  `contract: gentle-ai.review-integration/v1` with `start/v2` and `status/v2` only. Every
+  real freeze goes through `review/start` and fails with
+  `native-operation-failed` / `error_code: schema-incompatible`; `select-intended-untracked`
+  reports the same failure under `diagnostics.operation: "review/start"`. Both entry routes
+  were tried: a committed range (`baseRef` + `committedOnly`) and the live workspace. No
+  lineage was ever created (`lineage_created: false`) and nothing was mutated, so no
+  reset, recover or quarantine is owed. Phases were reviewed by delegated independent
+  verifiers instead; the native review stays owed until the two halves are realigned.
 - **Review size.** Six chained PRs is the mitigation; if PR 1 grows past roughly 600
   changed lines it should be split into "foundation + layout" and "home". PR 2 landed as
   two commits (`87de5a3` logic, `ec1c128` UI) totalling ~2085 added lines; the split is by
