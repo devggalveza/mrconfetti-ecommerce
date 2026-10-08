@@ -1,11 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { ProductRail } from "@/features/catalog/components/product-rail";
+import { BrandsShowcase } from "@/features/home/components/brands-showcase";
+import { CampaignBanners } from "@/features/home/components/campaign-banners";
 import { CategoryGrid } from "@/features/home/components/category-grid";
 import { HeroCarousel } from "@/features/home/components/hero-carousel";
 import { HeroPromoCard } from "@/features/home/components/hero-promo-card";
+import { SeasonBanner } from "@/features/home/components/season-banner";
 import { HOME_SECTION_HEADINGS } from "@/features/home/data/home-content";
-import { HOME_RAILS, type HomeRail } from "@/features/home/data/home-rails";
+import { HOME_RAILS } from "@/features/home/data/home-rails";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -14,7 +17,17 @@ export const Route = createFileRoute("/")({
   component: HomeComponent,
 });
 
-function RailSection({ rail }: { rail: HomeRail }) {
+/**
+ * Looks a rail up by id rather than by position, so reordering `HOME_RAILS`
+ * cannot silently shuffle the page and a renamed rail fails loudly.
+ */
+function RailSection({ id }: { id: string }) {
+  const rail = HOME_RAILS.find((entry) => entry.id === id);
+
+  if (rail === undefined) {
+    throw new Error(`HOME_RAILS is missing the "${id}" rail`);
+  }
+
   return (
     <ProductRail
       products={rail.products}
@@ -30,8 +43,6 @@ function RailSection({ rail }: { rail: HomeRail }) {
  * 1240px `Container`, so this component only assembles the sections.
  */
 function HomeComponent() {
-  const [dealsRail, ...otherRails] = HOME_RAILS;
-
   return (
     <>
       <section
@@ -44,14 +55,19 @@ function HomeComponent() {
 
       <CategoryGrid />
 
-      {dealsRail === undefined ? null : <RailSection rail={dealsRail} />}
+      <RailSection id="deals" />
 
-      {/* TODO(phase 3): product rails */}
-      {/* TODO(phase 4): campaigns, brands and season banner */}
+      <CampaignBanners />
 
-      {otherRails.map((rail) => (
-        <RailSection key={rail.id} rail={rail} />
-      ))}
+      <BrandsShowcase />
+
+      <RailSection id="graduacion" />
+      <RailSection id="globos-foil" />
+
+      <SeasonBanner />
+
+      <RailSection id="cumpleanos" />
+      <RailSection id="decoracion" />
     </>
   );
 }

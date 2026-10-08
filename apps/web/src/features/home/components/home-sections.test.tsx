@@ -11,13 +11,21 @@ import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { productsSearchSchema } from "@/features/catalog/schemas/products-search";
-import { CategoryGrid } from "@/features/home/components/category-grid";import { HeroCarousel } from "@/features/home/components/hero-carousel";
+import { BrandsShowcase } from "@/features/home/components/brands-showcase";
+import { CampaignBanners } from "@/features/home/components/campaign-banners";
+import { CategoryGrid } from "@/features/home/components/category-grid";
+import { HeroCarousel } from "@/features/home/components/hero-carousel";
 import { HeroPromoCard } from "@/features/home/components/hero-promo-card";
+import { SeasonBanner } from "@/features/home/components/season-banner";
 import {
   HERO_PROMO,
   HERO_SLIDES,
+  HOME_BRANDS,
+  HOME_CAMPAIGNS,
   HOME_CATEGORIES,
   HOME_SECTION_HEADINGS,
+  HOME_TRUST_CARDS,
+  SEASON_BANNER,
 } from "@/features/home/data/home-content";
 import { parseSearchParams, stringifySearchParams } from "@/lib/search-params";
 
@@ -37,6 +45,9 @@ const indexRoute = createRoute({
       <HeroCarousel />
       <HeroPromoCard />
       <CategoryGrid />
+      <CampaignBanners />
+      <BrandsShowcase />
+      <SeasonBanner />
     </>
   ),
 });
@@ -135,5 +146,81 @@ describe("popular categories", () => {
       within(section).getByRole("heading", { level: 2, name: HOME_SECTION_HEADINGS.popularCategories }),
     ).toBeTruthy();
     expect(within(section).getByRole("link", { name: /Ver todo/ })).toBeTruthy();
+  });
+});
+
+describe("campaign banners", () => {
+  it("renders one card per campaign, each with a single CTA link", async () => {
+    renderHomeSections();
+    const section = await screen.findByRole("region", {
+      name: HOME_SECTION_HEADINGS.campaigns,
+    });
+
+    const headings = within(section).getAllByRole("heading", { level: 3 });
+    expect(headings.map((heading) => heading.textContent)).toEqual(
+      HOME_CAMPAIGNS.map((campaign) => campaign.title),
+    );
+
+    const links = within(section).getAllByRole("link");
+    expect(links.map((link) => link.textContent)).toEqual(
+      HOME_CAMPAIGNS.map((campaign) => campaign.ctaLabel),
+    );
+  });
+
+  it("sends every campaign CTA to a products filter", async () => {
+    renderHomeSections();
+    const section = await screen.findByRole("region", {
+      name: HOME_SECTION_HEADINGS.campaigns,
+    });
+
+    for (const link of within(section).getAllByRole("link")) {
+      const url = new URL(link.getAttribute("href") ?? "", "https://mrconfetti.example");
+      expect(url.pathname).toBe("/products");
+      expect(productsSearchSchema.safeParse(Object.fromEntries(url.searchParams)).success).toBe(
+        true,
+      );
+    }
+  });
+});
+
+describe("brands showcase", () => {
+  it("renders one tile per real brand, each linking to its own filter", async () => {
+    renderHomeSections();
+    const section = await screen.findByRole("region", { name: HOME_SECTION_HEADINGS.brands });
+
+    const links = within(section).getAllByRole("link");
+    expect(links).toHaveLength(HOME_BRANDS.length);
+
+    links.forEach((link, index) => {
+      const url = new URL(link.getAttribute("href") ?? "", "https://mrconfetti.example");
+      expect(url.pathname).toBe("/products");
+      expect(url.searchParams.get("brand")).toBe(HOME_BRANDS[index]?.name);
+    });
+  });
+
+  it("renders the three trust cards as plain content, not links", async () => {
+    renderHomeSections();
+    const section = await screen.findByRole("region", { name: HOME_SECTION_HEADINGS.brands });
+
+    for (const card of HOME_TRUST_CARDS) {
+      expect(within(section).getByText(card.title)).toBeTruthy();
+      expect(within(section).getByText(card.detail)).toBeTruthy();
+    }
+  });
+});
+
+describe("season banner", () => {
+  it("renders the season heading, its description and its CTA", async () => {
+    renderHomeSections();
+    const section = await screen.findByRole("region", { name: SEASON_BANNER.title });
+
+    expect(
+      within(section).getByRole("heading", { level: 2, name: SEASON_BANNER.title }),
+    ).toBeTruthy();
+    expect(within(section).getByText(SEASON_BANNER.description)).toBeTruthy();
+
+    const cta = within(section).getByRole("link", { name: SEASON_BANNER.ctaLabel });
+    const url = new URL(cta.getAttribute("href") ?? "", "https://mrconfetti.example");
+    expect(url.pathname).toBe("/products");
   });
 });
