@@ -1,6 +1,6 @@
 # Feature: Mr. Confetti storefront (design-system + full design implementation)
 
-Status: in progress — Phase 0 complete
+Status: in progress — phases 0-4 complete, PR 1 ready for review
 Owner: el Gentleman (parent session)
 Branch: `feat/storefront` (from `main`)
 Source design: `%APPDATA%/Open Design/.../bf52a322-.../` — `index.html`, `products.html`,
@@ -365,7 +365,12 @@ snapshot-only tests.
 | Phase | Commit | Evidence |
 | --- | --- | --- |
 | scaffold cleanup | `dce0777` | starter ASCII banner, `/health` probe and forced dark class removed |
-| 0 — foundations | `89e19ff` | 39 tests pass, `check-types` clean, `build` succeeds |
+| 0 — foundations | `89e19ff` | 39 tests, `check-types` clean, `build` succeeds |
+| 1a — state and routes | `fdd3aac` | 78 tests; zustand stores under the legacy keys, seven typed routes |
+| 1b — shared chrome | `2302d5e` | 100 tests; SSR of `/` inspected for the shell, metadata and link hrefs |
+| 2 — hero and categories | `2a518cb` | 131 tests; SSR reports 3 slides, 3 dots, 1 active dot, 7 category links |
+| 3 — card and rails | `441c83f` | 143 tests; SSR reports 84 cards and 5 rail headings |
+| 4 — campaigns and assembly | `c63847f` | 160 tests; SSR reports all 10 sections in ascending order |
 
 Phase 0 delivered assets under `apps/web/public/` (logo, 3 banners, 12 product images,
 `favicon.ico`), brand tokens in `apps/web/src/index.css`, `apps/web/DESIGN_SYSTEM.md`,
@@ -383,6 +388,29 @@ Deviations from the plan as written:
   app. A script was added.
 - The unused legacy helpers `MC.totals()` and `window.MC_onSearch`, plus the duplicated
   shipping constants, are superseded by `lib/constants.ts` and `lib/coupons.ts`.
+
+Deviations found while building phases 1-4:
+
+- **Query-string codec.** TanStack Router's default codec runs every value through
+  `JSON.stringify`, so filter links came out as `/products?cat=%5B%22Globos%22%5D`. The
+  router now uses `lib/search-params.ts`, so links read `/products?cat=Globos` and
+  `/products?cat=Globos&cat=Personajes`. This had to be fixed before the catalog existed,
+  because the footer, the category rail and every filter link depend on it.
+- **Tinted surfaces.** The source's final override pass paints `.cat .c`, `.brand` and the
+  category wells white, which erases them against a white page. They keep the subtle tint
+  the same file specified before that pass. Flagged as one decision, easily reversed.
+- **Carousel pause control.** Added over the source, because WCAG 2.2.2 requires a way to
+  stop content that advances on its own.
+- **Campaign gradients.** The source's magenta/blue/red belonged to the template's brand,
+  and the amber first chosen for the third card gave white text a 2.1:1 contrast ratio.
+  All three gradients are now dark enough for white text.
+- **Rail arrows** disable at the edge they cannot scroll past; the source leaves them
+  always enabled.
+- **`role="group"` was removed from the rail `ul`** after a first draft stripped its list
+  semantics; the rail keeps native list markup.
+- **Brand row** fits three real brands instead of the source's eight-column layout.
+- **Lucide icons replace the source's inline SVG sprite**, and `rounded-lg` is 12px in this
+  project's radius scale while `rounded-xl` is 16px.
 
 ## Open risks
 
