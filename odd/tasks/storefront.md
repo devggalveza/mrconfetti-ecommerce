@@ -1,6 +1,6 @@
 # Feature: Mr. Confetti storefront (design-system + full design implementation)
 
-Status: in progress — phases 0-4 complete, PR 1 ready for review
+Status: in progress — phases 0-5 complete, PR 1 reviewed, PR 2 in review
 Owner: el Gentleman (parent session)
 Branch: `feat/storefront` (from `main`)
 Source design: `%APPDATA%/Open Design/.../bf52a322-.../` — `index.html`, `products.html`,
@@ -371,6 +371,8 @@ snapshot-only tests.
 | 2 — hero and categories | `2a518cb` | 131 tests; SSR reports 3 slides, 3 dots, 1 active dot, 7 category links |
 | 3 — card and rails | `441c83f` | 143 tests; SSR reports 84 cards and 5 rail headings |
 | 4 — campaigns and assembly | `c63847f` | 160 tests; SSR reports all 10 sections in ascending order |
+| 5 — catalog (logic) | `87de5a3` | filter state, coercion and tests first; 3 shadcn primitives vendored |
+| 5 — catalog (UI) | `ec1c128` | 208 tests; `check-types` and `build` clean; route render test covers 12-per-page, chips, empty state and query round-trip |
 
 Phase 0 delivered assets under `apps/web/public/` (logo, 3 banners, 12 product images,
 `favicon.ico`), brand tokens in `apps/web/src/index.css`, `apps/web/DESIGN_SYSTEM.md`,
@@ -412,10 +414,42 @@ Deviations found while building phases 1-4:
 - **Lucide icons replace the source's inline SVG sprite**, and `rounded-lg` is 12px in this
   project's radius scale while `rounded-xl` is 16px.
 
+Deviations found while building phase 5:
+
+- **Two declared shadcn primitives were not needed.** The plan listed `select` and
+  `pagination`; the sort control is a native `<select>` (lighter, accessible, no
+  portal) and the pager is a purpose-built `features/catalog/components/pagination.tsx`
+  because shadcn's `pagination` is only markup helpers over the same `<nav>`. `badge`
+  stays and is used by the header and `product-price`; the active chips are hand-rolled
+  because `Badge` is not interactive. `separator.tsx`, added by this phase and used by
+  nothing in the app, was removed.
+- **Filter state is owned by the URL, not mirrored from component state.** The plan said
+  filters live in component state and are mirrored into the search params. The outcome
+  the criterion wanted — shareable, deep-linkable filters — is met more directly by
+  reading and writing the search params as the single source; only the drawer and the
+  price draft hold local state.
+- **`?deal=1` normalises to `?deal=true`.** The schema accepts `1` and the flag is
+  re-emitted through the generic codec as `true`, so the literal URL form named in the
+  criterion is not reproduced byte for byte. Every other key round-trips as written; the
+  same one-way normalisation drops any default value on the way out.
+- **`routeFileIgnorePattern` was added to `vite.config.ts`** so the route-adjacent
+  `products.test.tsx` stops tripping the generator's "does not export a Route" warning
+  on every test run and on each of the build's three passes.
+- **`minRating=-0` survives as `-0`.** Consolidating the coercion rules into the schema
+  module made `?minRating=-0` reachable as `-0` instead of a canonical `0`. Comparisons
+  and the chip suppression are unaffected, so it is recorded rather than patched.
+
 ## Open risks
 
 - **Review size.** Six chained PRs is the mitigation; if PR 1 grows past roughly 600
-  changed lines it should be split into "foundation + layout" and "home".
+  changed lines it should be split into "foundation + layout" and "home". PR 2 landed as
+  two commits (`87de5a3` logic, `ec1c128` UI) totalling ~2085 added lines; the split is by
+  layer, not by review slice, so a reviewer still reads the phase as one change.
+- **Pre-existing test flake.** `apps/web/src/features/home/components/home-route.test.tsx`
+  uses `findByRole` without an explicit timeout (lines 133 and 150) in the same file that
+  scans the whole `src` tree synchronously, while Vitest runs 24 files in parallel. The
+  default 1000 ms `asyncUtilTimeout` was observed to expire once. Belongs to phase 4, not
+  to this phase; the fix belongs to the phase 10 pass.
 - **Image weight.** `banner3-independencia.png` is 629 KB. It will be copied as-is for
   fidelity; compression is a separate, optional follow-up.
 - **Font.** Resolved in Phase 0: Poppins (latin 400-800), self-hosted. Inter Variable was
