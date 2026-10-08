@@ -9,11 +9,16 @@ export type ProductsSearch = {
   deal?: boolean;
   sort?: SortKey;
   page?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+  freeShipping?: boolean;
 };
 
 const SORT_KEYS = SORT_OPTIONS.map((option) => option.value);
 const DEFAULT_SORT: SortKey = "rel";
 const DEFAULT_PAGE = 1;
+const MAX_RATING = 5;
 
 /** Accepts a single string or a string array and keeps only non-empty entries. */
 function toTextList(value: unknown): string[] | undefined {
@@ -52,6 +57,21 @@ function toPage(value: unknown): number | undefined {
   return Math.max(DEFAULT_PAGE, Math.trunc(parsed));
 }
 
+/** Coerces a finite, non-negative amount, so a negative price bound is dropped. */
+function toAmount(value: unknown): number | undefined {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
+}
+
+/** Coerces a rating threshold and clamps it into `0..5`. */
+function toRating(value: unknown): number | undefined {
+  const parsed = toAmount(value);
+  return parsed === undefined ? undefined : Math.min(MAX_RATING, parsed);
+}
+
 export const productsSearchSchema: z.ZodType<ProductsSearch> = z
   .object({
     cat: z.preprocess(toTextList, z.array(z.string()).optional()),
@@ -62,6 +82,10 @@ export const productsSearchSchema: z.ZodType<ProductsSearch> = z
     page: z
       .preprocess(toPage, z.number().int().min(DEFAULT_PAGE).catch(DEFAULT_PAGE))
       .optional(),
+    minPrice: z.preprocess(toAmount, z.number().optional()),
+    maxPrice: z.preprocess(toAmount, z.number().optional()),
+    minRating: z.preprocess(toRating, z.number().optional()),
+    freeShipping: z.preprocess(toFlag, z.boolean().optional()),
   })
   .transform((value) => ({
     cat: value.cat,
@@ -70,4 +94,8 @@ export const productsSearchSchema: z.ZodType<ProductsSearch> = z
     deal: value.deal,
     sort: value.sort ?? DEFAULT_SORT,
     page: value.page ?? DEFAULT_PAGE,
+    minPrice: value.minPrice,
+    maxPrice: value.maxPrice,
+    minRating: value.minRating,
+    freeShipping: value.freeShipping,
   }));

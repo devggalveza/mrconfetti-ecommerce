@@ -1,3 +1,6 @@
+/** Number of catalog products shown on one page of the product grid. */
+export const PRODUCTS_PER_PAGE = 12;
+
 /** Maximum quantity of a single product that can be added to the cart. */
 export const MAX_QUANTITY = 9;
 
