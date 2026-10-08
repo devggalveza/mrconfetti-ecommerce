@@ -3,9 +3,12 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
+import { Container } from "@/components/layout/container";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
 import { Toaster } from "@/components/ui/sonner";
+import { StoreProvider } from "@/stores/store-provider";
 
-import Header from "../components/header";
 import appCss from "../index.css?url";
 
 export type RouterAppContext = {
@@ -23,13 +26,22 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "My App",
+        title: "Mr. Confetti – Todo para tu fiesta",
+      },
+      {
+        name: "description",
+        content:
+          "Globos, decoración y dulces para cumpleaños, graduaciones y revelaciones de género. Envío a toda Guatemala.",
       },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      {
+        rel: "icon",
+        href: "/favicon.ico",
       },
     ],
   }),
@@ -39,15 +51,22 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 
 function RootDocument() {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <HeadContent />
       </head>
       <body>
-        <div className="grid h-svh grid-rows-[auto_1fr]">
-          <Header />
-          <Outlet />
-        </div>
+        <StoreProvider>
+          <div className="flex min-h-svh flex-col">
+            <SiteHeader />
+            <main className="flex-1">
+              <Container>
+                <Outlet />
+              </Container>
+            </main>
+            <SiteFooter />
+          </div>
+        </StoreProvider>
         <Toaster richColors />
 
         <TanStackRouterDevtools position="bottom-left" />

@@ -4,6 +4,7 @@ import { routerWithQueryClient } from "@tanstack/react-router-with-query";
 
 import Loader from "./components/loader";
 import "./index.css";
+import { parseSearchParams, stringifySearchParams } from "./lib/search-params";
 import { routeTree } from "./routeTree.gen";
 
 export const getRouter = () => {
@@ -16,6 +17,10 @@ export const getRouter = () => {
     context: { queryClient },
     defaultPendingComponent: () => <Loader />,
     defaultNotFoundComponent: () => <div>Not Found</div>,
+    // Keep filter lists readable in the address bar (?cat=Globos) instead of the
+    // default JSON encoding (?cat=%5B%22Globos%22%5D).
+    parseSearch: parseSearchParams,
+    stringifySearch: stringifySearchParams,
   });
 
   // Wraps the app in a QueryClientProvider and enables SSR hydration of queries.
