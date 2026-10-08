@@ -46,7 +46,7 @@ function toFlag(value: unknown): boolean | undefined {
 }
 
 /** Coerces a page number from a string and clamps it to `>= 1`. */
-function toPage(value: unknown): number | undefined {
+export function toPage(value: unknown): number | undefined {
   if (value === undefined || value === null || value === "") {
     return undefined;
   }
@@ -58,7 +58,7 @@ function toPage(value: unknown): number | undefined {
 }
 
 /** Coerces a finite, non-negative amount, so a negative price bound is dropped. */
-function toAmount(value: unknown): number | undefined {
+export function toAmount(value: unknown): number | undefined {
   if (value === undefined || value === null || value === "") {
     return undefined;
   }
@@ -67,7 +67,7 @@ function toAmount(value: unknown): number | undefined {
 }
 
 /** Coerces a rating threshold and clamps it into `0..5`. */
-function toRating(value: unknown): number | undefined {
+export function toRating(value: unknown): number | undefined {
   const parsed = toAmount(value);
   return parsed === undefined ? undefined : Math.min(MAX_RATING, parsed);
 }

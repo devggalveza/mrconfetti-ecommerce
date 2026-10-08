@@ -1,3 +1,5 @@
+import { DEAL_MIN_DISCOUNT_PERCENT } from "@/lib/constants";
+
 import type { Brand, Category, Product, SortKey } from "../schemas/product";
 
 /** Rounds the relative discount of a product to a whole percentage. */
@@ -50,7 +52,7 @@ export function freeShippingOnly(list: readonly Product[], enabled: boolean): Pr
 export function dealsOnly(
   list: readonly Product[],
   enabled: boolean,
-  minimumDiscount = 30,
+  minimumDiscount = DEAL_MIN_DISCOUNT_PERCENT,
 ): Product[] {
   if (!enabled) {
     return [...list];

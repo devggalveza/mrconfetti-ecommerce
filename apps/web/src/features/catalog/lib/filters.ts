@@ -9,7 +9,7 @@ import {
   type Product,
   type SortKey,
 } from "../schemas/product";
-import type { ProductsSearch } from "../schemas/products-search";
+import { toAmount, toPage, toRating, type ProductsSearch } from "../schemas/products-search";
 import {
   byBrand,
   byCategory,
@@ -89,46 +89,22 @@ function toKnownBrands(values: readonly string[] | undefined): Brand[] {
   return result;
 }
 
-/** Turns a raw price bound into a usable one, or `null` when it is negative or not finite. */
-function toBound(value: number | null | undefined): number | null {
-  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
-    return null;
-  }
-  return value;
-}
-
-/** Clamps a raw rating threshold into `0..5`, defaulting to no rating filter. */
-function toRating(value: number | null | undefined): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    return 0;
-  }
-  return Math.min(5, Math.max(0, value));
-}
-
-/** Clamps a raw page number to a 1-based integer, defaulting to the first page. */
-function toPage(value: number | undefined): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    return DEFAULT_FILTERS.page;
-  }
-  return Math.max(1, Math.trunc(value));
-}
-
 /** Converts validated search state into filters, sanitising every value the URL may carry. */
 export function readFilters(search: ProductsSearch): CatalogFilters {
-  const minPrice = toBound(search.minPrice);
-  const maxPrice = toBound(search.maxPrice);
+  const minPrice = toAmount(search.minPrice) ?? null;
+  const maxPrice = toAmount(search.maxPrice) ?? null;
   const reversed = minPrice !== null && maxPrice !== null && minPrice > maxPrice;
   return {
     categories: toKnownCategories(search.cat),
     brands: toKnownBrands(search.brand),
     minPrice: reversed ? null : minPrice,
     maxPrice: reversed ? null : maxPrice,
-    minRating: toRating(search.minRating),
+    minRating: toRating(search.minRating) ?? DEFAULT_FILTERS.minRating,
     freeShippingOnly: search.freeShipping === true,
     dealsOnly: search.deal === true,
     query: search.q ?? "",
     sort: search.sort ?? DEFAULT_FILTERS.sort,
-    page: toPage(search.page),
+    page: toPage(search.page) ?? DEFAULT_FILTERS.page,
   };
 }
 

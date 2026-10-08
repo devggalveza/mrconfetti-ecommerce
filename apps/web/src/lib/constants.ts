@@ -15,3 +15,6 @@ export const EXPRESS_SHIPPING_PRICE = 7.95;
 
 /** Price (in GTQ) of the store pickup option. */
 export const PICKUP_SHIPPING_PRICE = 2.95;
+
+/** Minimum discount (in percent) for a product to count as a deal. */
+export const DEAL_MIN_DISCOUNT_PERCENT = 30;
