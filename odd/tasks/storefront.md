@@ -374,6 +374,8 @@ snapshot-only tests.
 | 5 — catalog (logic) | `87de5a3` | filter state, coercion and tests first; 3 shadcn primitives vendored |
 | 5 — catalog (UI) | `ec1c128` | 208 tests; `check-types` and `build` clean; route render test covers 12-per-page, chips, empty state and query round-trip |
 | 6a — product detail data | `076c753` | 259 tests; every legacy field verified byte-identical to `HEAD` across the 36 products |
+| 6b-i — product detail content | `8cfb571` | 272 tests; `description`/`highlights` added and authored for all 36; the page's copy becomes a typed module |
+| 6b-ii — product detail UI | `631473c` | 309 tests; the route was unreachable and now renders from the real tree; `check-types` and `build` clean |
 
 Phase 0 delivered assets under `apps/web/public/` (logo, 3 banners, 12 product images,
 `favicon.ico`), brand tokens in `apps/web/src/index.css`, `apps/web/DESIGN_SYSTEM.md`,
@@ -473,6 +475,49 @@ Deviations found while building phase 6a:
   could still rewrite `PRODUCT_PACKS[0].name` at runtime. Accepted rather than deep-frozen,
   to keep the fix minimal.
 
+Deviations found while building phase 6b:
+
+- **The route never rendered, and no test could have caught it.** `products.$productId.tsx`
+  was nested under the `/products` route, which renders no `<Outlet/>`, so routing to the
+  detail mounted the listing and dropped the page. The unit's test built its own root with
+  an `Outlet` and the detail route as its direct child, so it passed against a tree the app
+  never uses. Fixed by renaming to `products_.$productId.tsx` — the framework's nesting
+  opt-out — which makes the generated tree parent the route to the root while the public
+  path stays `/products/$productId`. The test now mounts the real `routeTree.gen.ts`, which
+  is the part that matters: this class of defect can no longer hide.
+- **The page's state is keyed to the product.** The router reuses one component instance
+  across a param change, so navigating product → product through the related rail kept the
+  quantity, the pack and the add status. A verifier reproduced all three faces: up to nine
+  units following the reader onto a product whose stock is three, the previous product's
+  `Q.19` gift-wrap surcharge still priced into the new product, and an in-flight timer still
+  writing the old product id. The stateful page is now keyed by the product id and the add
+  call site clamps the quantity, so the ceiling no longer rests on the stepper being the
+  only writer.
+- **The quantity ceiling is `min(MAX_QUANTITY, stock)`, not `stock` and not the design's
+  `12`.** The stock line reports the real stock, which reaches 30, so a product can say
+  "quedan 14 unidades" while the stepper stops at 9. Deliberate: `MAX_QUANTITY` is a
+  per-order cap, the stock is availability, and they answer different questions.
+- **The pack surcharge flows into the price block, so the discount badge recomputes with
+  it** — base `-25 %`, gift wrap `-16 %`. The design keeps the badge at the base figure.
+  Recorded rather than fixed: holding the badge steady needs `ProductPrice` to take a
+  separate badge price, which is phase 5's component and outside this unit.
+- **The coupon validates and reports but changes no money.** The design behaves the same
+  way. Applying a discount to a total belongs to checkout, and a verifier confirmed every
+  `Q.` amount on the page is byte-identical before and after a valid code.
+- **The gallery has one thumbnail** because the model carries one image, and it renders as
+  an `aria-pressed` button inside a named list rather than the design's `tablist` holding a
+  single tab. The zoom toggles the scale and the hint; it does not follow the pointer to
+  the click origin.
+- **The tabs primitive is vendored over `@base-ui/react/tabs`**, the family the other
+  vendored primitives use, rather than the `radix-nova` style `components.json` declares.
+  No dependency was added.
+- **`formatRatingValue` extracted from `formatRating`**, which now reuses it: the aggregate
+  line needs a bare `4,6` while the combined `4,6 (312)` output stays byte-identical.
+- **Review size.** PR 3 lands as two commits totalling roughly 2,495 changed lines across
+  22 files, the largest slice in the feature. The split is by layer, not by review slice:
+  the content half is read-and-skim, the component half is what needs reading, and the
+  route test alone is 567 lines.
+
 ## Open risks
 
 - **The native review lifecycle is unusable in this environment.** The Pi review facade
@@ -489,7 +534,8 @@ Deviations found while building phase 6a:
 - **Review size.** Six chained PRs is the mitigation; if PR 1 grows past roughly 600
   changed lines it should be split into "foundation + layout" and "home". PR 2 landed as
   two commits (`87de5a3` logic, `ec1c128` UI) totalling ~2085 added lines; the split is by
-  layer, not by review slice, so a reviewer still reads the phase as one change.
+  layer, not by review slice, so a reviewer still reads the phase as one change. PR 3 is
+  the largest: `8cfb571` and `631473c`, ~2,495 changed lines across 22 files.
 - **Pre-existing test flake.** `apps/web/src/features/home/components/home-route.test.tsx`
   uses `findByRole` without an explicit timeout (lines 133 and 150) in the same file that
   scans the whole `src` tree synchronously, while Vitest runs 24 files in parallel. The
@@ -499,10 +545,26 @@ Deviations found while building phase 6a:
   fidelity; compression is a separate, optional follow-up.
 - **Font.** Resolved in Phase 0: Poppins (latin 400-800), self-hosted. Inter Variable was
   dead code and has been removed.
-- **Repository hygiene.** `local.db`, `.codegraph/` and `apps/web/src/routeTree.gen.ts` are
-  untracked and `local.db` is not in `.gitignore`. A committed SQLite database would be a
-  real accident; `local.db` should be ignored. Flagged, not changed, because it is outside
-  this feature.
+- **Repository hygiene.** `local.db` and `.codegraph/` are untracked and `local.db` is not
+  in `.gitignore`. A committed SQLite database would be a real accident; `local.db` should
+  be ignored. Flagged, not changed, because it is outside this feature.
+  (`apps/web/src/routeTree.gen.ts` is generated but *is* tracked, as it should be; an
+  earlier note here claimed otherwise and was wrong.)
+- **Pre-existing dedup fragility in the related rail.** A rail card adds a unit
+  unconditionally, while `quantityLimit` is `0` for a product with no stock. Harmless today
+  because the catalogue's minimum stock is 3, and it would only bite if a zero-stock row is
+  ever authored. Phase 10.
+- **Pre-existing accessibility gap in the rail.** The five rail cards and the detail page's
+  primary button all read `Añadir al carrito`; the detail page's own button now carries the
+  product name in its accessible name, but the five cards still do not, so a screen-reader
+  user cannot tell them apart. The card component belongs to phase 5. Phase 10.
+- **The suite is load-sensitive, not single-test flaky.** Running the suite twice in
+  parallel produced timeouts in `home-route.test.tsx`, `routes/products.test.tsx` and
+  `routes/products_.$productId.test.tsx` alike — two of them untouched by this phase. The
+  new route test is heavy (12 tests, ~4-9 s per file) but not uniquely unstable; the real
+  defect is that no `vitest` config exists to raise the timeout or bound the pool. Phase 10.
+- **Two verification gaps left open.** The document title has no test, and no browser or
+  responsive pass was run at the four breakpoints; both are phase 10 work.
 - **Scope of `/login`.** The design's "Iniciar sesión" points at the existing scaffold
   route, which is not part of the design. If the user wants a designed login page, that is
   a new feature, not part of this one.
