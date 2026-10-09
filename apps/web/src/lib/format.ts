@@ -18,10 +18,18 @@ export function formatMoney(amount: number): string {
   return decimalPart === "00" ? `Q.${grouped}` : `Q.${grouped}.${decimalPart}`;
 }
 
+/**
+ * Formats a bare rating to one decimal with a comma separator and no suffix, e.g. `4,6`.
+ * Rounds half-up on the scaled value, so it is the single rule `formatRating` reuses.
+ */
+export function formatRatingValue(rating: number): string {
+  const rounded = Math.round(rating * 10) / 10;
+  return rounded.toFixed(1).replace(".", ",");
+}
+
 /** Formats a rating to one decimal with a comma separator, plus its review count. */
 export function formatRating(rating: number, reviews: number): string {
-  const rounded = Math.round(rating * 10) / 10;
-  return `${rounded.toFixed(1).replace(".", ",")} (${reviews})`;
+  return `${formatRatingValue(rating)} (${reviews})`;
 }
 
 /** Formats a discount percentage as `-NN %`. */

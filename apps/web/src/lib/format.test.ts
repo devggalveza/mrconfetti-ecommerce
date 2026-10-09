@@ -4,6 +4,7 @@ import {
   formatDiscount,
   formatMoney,
   formatRating,
+  formatRatingValue,
   formatReviewCount,
   roundMoney,
 } from "./format";
@@ -46,6 +47,32 @@ describe("roundMoney", () => {
 describe("formatRating", () => {
   it("renders the rounded rating with a comma decimal separator", () => {
     expect(formatRating(4.9, 312)).toBe("4,9 (312)");
+  });
+});
+
+describe("formatRatingValue", () => {
+  it("renders one decimal with a comma separator and no review count", () => {
+    expect(formatRatingValue(4.9)).toBe("4,9");
+  });
+
+  it("rounds half up when the scaled value lands exactly on x.5", () => {
+    expect(formatRatingValue(4.65)).toBe("4,7");
+    expect(formatRatingValue(4.95)).toBe("5,0");
+  });
+
+  it("keeps the tenth below the boundary", () => {
+    expect(formatRatingValue(4.94)).toBe("4,9");
+  });
+
+  it("pads whole ratings to one decimal", () => {
+    expect(formatRatingValue(5)).toBe("5,0");
+    expect(formatRatingValue(0)).toBe("0,0");
+  });
+
+  it("stays the sole rule behind formatRating's rating part", () => {
+    for (const rating of [0, 4.65, 4.94, 5, 3.45]) {
+      expect(formatRating(rating, 7).startsWith(formatRatingValue(rating))).toBe(true);
+    }
   });
 });
 
