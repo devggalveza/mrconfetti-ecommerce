@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { MAX_QUANTITY } from "@/lib/constants";
+
+import * as productDetailContent from "../data/product-detail-content";
 import { PRODUCT_PACKS } from "../data/product-options";
 import { products } from "../data/products";
 import { productSchema, type Product, type ProductPack } from "../schemas/product";
@@ -7,6 +10,7 @@ import {
   deliveryEstimate,
   instalments,
   priceWithPack,
+  quantityLimit,
   reviewDistribution,
 } from "./product-detail";
 import { relatedProducts } from "./selectors";
@@ -32,6 +36,13 @@ function extendedProduct(overrides: Record<string, unknown> = {}) {
     packs: [
       { name: "Producto solo", extra: 0 },
       { name: "Con envoltorio de regalo", extra: 19 },
+    ],
+    description: "Globos de látex para una fiesta completa.",
+    highlights: [
+      "Rinde para un arco completo.",
+      "El látex aguanta toda la jornada.",
+      "Incluye cinta y bomba.",
+      "Combina con la mesa dulce.",
     ],
     customerReviews: [
       { author: "Ana Lucía R.", rating: 5, date: "2024-09-12", body: "Excelente calidad." },
@@ -146,6 +157,21 @@ describe("extended productSchema", () => {
         }),
       ).success,
     ).toBe(false);
+  });
+
+  it("rejects an empty description", () => {
+    expect(productSchema.safeParse(extendedProduct({ description: "" })).success).toBe(false);
+  });
+
+  it("rejects an empty highlights list or an empty highlight", () => {
+    expect(productSchema.safeParse(extendedProduct({ highlights: [] })).success).toBe(false);
+    expect(productSchema.safeParse(extendedProduct({ highlights: [""] })).success).toBe(false);
+  });
+
+  it("accepts a valid description and highlights list", () => {
+    const parsed = productSchema.parse(extendedProduct());
+    expect(parsed.description).toBe("Globos de látex para una fiesta completa.");
+    expect(parsed.highlights).toHaveLength(4);
   });
 
   it("rejects an empty review author or body", () => {
@@ -329,6 +355,59 @@ describe("deliveryEstimate", () => {
   });
 });
 
+describe("catalogue detail content", () => {
+  it("covers all 36 products", () => {
+    expect(products).toHaveLength(36);
+  });
+
+  it("gives every product a non-empty, unique description", () => {
+    const descriptions = products.map((product) => product.description);
+    for (const description of descriptions) {
+      expect(description.trim().length).toBeGreaterThan(0);
+    }
+    expect(new Set(descriptions).size).toBe(products.length);
+  });
+
+  it("gives every product exactly four non-empty highlights ending in a period", () => {
+    for (const product of products) {
+      expect(product.highlights).toHaveLength(4);
+      for (const highlight of product.highlights) {
+        expect(highlight.trim().length).toBeGreaterThan(0);
+        expect(highlight.endsWith(".")).toBe(true);
+      }
+    }
+  });
+
+  it("keeps every highlight array distinct", () => {
+    const signatures = products.map((product) => product.highlights.join("|"));
+    expect(new Set(signatures).size).toBe(products.length);
+  });
+});
+
+describe("quantityLimit", () => {
+  const product = products[0];
+
+  it("returns zero when the product has no stock", () => {
+    expect(quantityLimit({ ...product, stock: 0 })).toBe(0);
+  });
+
+  it("returns zero for a negative stock", () => {
+    expect(quantityLimit({ ...product, stock: -4 })).toBe(0);
+  });
+
+  it("uses the units on hand when the stock is below the ceiling", () => {
+    expect(quantityLimit({ ...product, stock: 3 })).toBe(3);
+  });
+
+  it("uses the ceiling when the stock equals it", () => {
+    expect(quantityLimit({ ...product, stock: MAX_QUANTITY })).toBe(MAX_QUANTITY);
+  });
+
+  it("caps a stock above the ceiling", () => {
+    expect(quantityLimit({ ...product, stock: MAX_QUANTITY + 40 })).toBe(MAX_QUANTITY);
+  });
+});
+
 describe("relatedProducts", () => {
   it("lists same-category products first and excludes the current one", () => {
     const current = products[0];
@@ -358,5 +437,35 @@ describe("relatedProducts", () => {
     const before = products.map((product) => product.id);
     expect(relatedProducts(products, products[0])).toHaveLength(5);
     expect(products.map((product) => product.id)).toEqual(before);
+  });
+});
+
+/** Probe used to exercise the content module's string builders; only emptiness matters. */
+const CONTENT_PROBE = "Producto";
+
+/** Flattens the module's exports into the strings they produce for a sample value. */
+function collectContentStrings(value: unknown): string[] {
+  if (typeof value === "string") {
+    return [value];
+  }
+  if (typeof value === "function") {
+    return collectContentStrings((value as (probe: string) => unknown)(CONTENT_PROBE));
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap(collectContentStrings);
+  }
+  if (value !== null && typeof value === "object") {
+    return Object.values(value).flatMap(collectContentStrings);
+  }
+  return [];
+}
+
+describe("product detail copy", () => {
+  it("exports only non-empty strings and string builders", () => {
+    const values = collectContentStrings(productDetailContent);
+    expect(values.length).toBeGreaterThan(0);
+    for (const value of values) {
+      expect(value.trim().length).toBeGreaterThan(0);
+    }
   });
 });

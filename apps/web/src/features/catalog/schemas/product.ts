@@ -50,6 +50,13 @@ export const productSchema = z
   .object({
     id: z.number().int().positive(),
     name: z.string().min(1),
+    /** Spanish sales copy shown in the detail page's description tab. */
+    description: z.string().min(1),
+    /**
+     * Short benefit bullets rendered under `description`, each one a complete
+     * sentence. They expand on the `specs` rows instead of repeating them.
+     */
+    highlights: z.array(z.string().min(1)).min(1),
     category: z.enum(CATEGORIES),
     brand: z.enum(BRANDS),
     price: z.number().nonnegative(),
@@ -61,7 +68,10 @@ export const productSchema = z
     image: z.string().startsWith("/"),
     width: z.number().int().positive(),
     height: z.number().int().positive(),
-    /** Units available; the quantity stepper clamps to this value. */
+    /**
+     * Units available. The detail page's quantity stepper clamps to the smaller of
+     * this value and the per-order ceiling (`MAX_QUANTITY` in `lib/constants.ts`).
+     */
     stock: z.number().int().nonnegative(),
     /** Detail page specification rows. */
     specs: z.array(productSpecSchema).min(1),

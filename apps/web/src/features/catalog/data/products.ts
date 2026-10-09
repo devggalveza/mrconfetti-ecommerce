@@ -6,6 +6,13 @@ export const products: readonly Product[] = [
     id: 1, name: "Globo gigante negro \"Boy or Girl?\" para revelación de género", category: "Revelación de género", brand: "Mr. Confetti",
     price: 149, original: 199, rating: 4.9, reviews: 312, freeShipping: true,
     image: "/products/p01.webp", width: 736, height: 920, stock: 18,
+    description: "Globo de látex natural de 45 cm de diámetro que carga el confeti incluido y estalla para revelar el sexo del bebé. Se sujeta con la cinta que viene en el paquete y su acabado negro grafito combina con la decoración de la fiesta.",
+    highlights: [
+      "Estalla con el confeti y anuncia el sexo del bebé en segundos.",
+      "El diámetro de 45 cm deja ver la sorpresa desde el fondo del salón.",
+      "La cinta incluida permite colgarlo del techo o de un arco.",
+      "El negro grafito esconde el interior hasta el momento de la revelación.",
+    ],
     specs: [
       { label: "Material", value: "Látex natural" }, { label: "Tamaño", value: "45 cm de diámetro" },
       { label: "Incluye", value: "Globo, confeti y cinta" }, { label: "Uso", value: "Revelación de género" },
@@ -21,6 +28,13 @@ export const products: readonly Product[] = [
     id: 2, name: "Surtido de dulces mexicanos para piñata (50 piezas)", category: "Dulces y piñata", brand: "Dulces Selectos",
     price: 89, original: 119, rating: 4.7, reviews: 540, freeShipping: true,
     image: "/products/p02.webp", width: 628, height: 837, stock: 24,
+    description: "Bolsa con 50 piezas surtidas de dulces mexicanos y 1.2 kg de golosinas para llenar la piñata de un cumpleaños. La selección llega desde México con sabores dulces y ácidos, aunque puede contener leche y soya.",
+    highlights: [
+      "Las 50 piezas completan una piñata mediana sin quedarse corto.",
+      "Los 1.2 kg rinden para una mesa dulce de fiesta familiar.",
+      "La mezcla mexicana alterna acidez y dulce para no empalagar.",
+      "La etiqueta avisa de la leche y la soya antes de repartir.",
+    ],
     specs: [
       { label: "Contenido", value: "50 piezas surtidas" }, { label: "Peso", value: "1.2 kg" },
       { label: "Alérgenos", value: "Puede contener leche y soya" }, { label: "Origen", value: "México" },
@@ -36,6 +50,13 @@ export const products: readonly Product[] = [
     id: 3, name: "Kit de globos Constructor amarillo y negro con excavadoras", category: "Cumpleaños", brand: "Mr. Confetti",
     price: 229, original: 329, rating: 4.8, reviews: 187, freeShipping: true,
     image: "/products/p03.webp", width: 736, height: 736, stock: 15,
+    description: "Kit de 42 globos de látex y foil con la temática Constructor en amarillo y negro, pensado para el cumpleaños de quien ama las excavadoras. Trae cinta, hilo y bomba para armar el arco sin comprar accesorios por separado.",
+    highlights: [
+      "Los 42 globos alcanzan para un arco y algunos racimos de refuerzo.",
+      "El foil con motivos de excavadora da el toque temático sin inflar de más.",
+      "La bomba incluida ahorra una compra extra el día del montaje.",
+      "El amarillo con negro combina con la mesa y las guirnaldas.",
+    ],
     specs: [
       { label: "Material", value: "Látex y foil" }, { label: "Piezas", value: "42 globos" },
       { label: "Incluye", value: "Cinta, hilo y bomba" }, { label: "Tema", value: "Constructor" },
@@ -51,6 +72,13 @@ export const products: readonly Product[] = [
     id: 4, name: "Arco de globos Graduación #PROM6 rosa y dorado, 153 globos", category: "Graduación", brand: "Mr. Confetti",
     price: 389, original: 499, rating: 4.9, reviews: 96, freeShipping: true,
     image: "/products/p04.webp", width: 512, height: 512, stock: 5,
+    description: "Arco de 153 globos de látex y foil en rosa cuarzo y dorado que se arma sobre una base de 2 m para la mesa de graduación. Incluye cinta, hilo y bomba, así que el montaje se resuelve en una sola sesión.",
+    highlights: [
+      "Los 153 globos cubren el arco de 2 m completo.",
+      "El dorado aporta el brillo que piden las fotos de graduación.",
+      "El foil se mantiene inflado más tiempo que el látex en el salón.",
+      "Con cinta, hilo y bomba no hace falta comprar nada aparte.",
+    ],
     specs: [
       { label: "Piezas", value: "153 globos" }, { label: "Combinación", value: "Rosa y dorado" },
       { label: "Material", value: "Látex y foil" }, { label: "Tamaño", value: "Arco de 2 m" },
@@ -67,6 +95,13 @@ export const products: readonly Product[] = [
     id: 5, name: "Arco de globos Graduación #PROM7 azul y dorado, 128 globos", category: "Graduación", brand: "Mr. Confetti",
     price: 339, original: 449, rating: 4.8, reviews: 74, freeShipping: true,
     image: "/products/p05.webp", width: 512, height: 512, stock: 14,
+    description: "Arco de 128 globos de látex y foil en azul y dorado con estructura de 2 m para decorar la ceremonia de graduación. Llega con cinta, hilo y bomba para montarlo en casa o en el salón.",
+    highlights: [
+      "Los 128 globos forman un arco de 2 m con la distribución justa.",
+      "El azul y el dorado dan un contraste más sobrio que el rosa.",
+      "El foil de las piezas decorativas conserva el brillo durante toda la fiesta.",
+      "La bomba incluida evita rentar equipo para inflar.",
+    ],
     specs: [
       { label: "Piezas", value: "128 globos" }, { label: "Combinación", value: "Azul y dorado" },
       { label: "Material", value: "Látex y foil" }, { label: "Tamaño", value: "Arco de 2 m" },
@@ -83,6 +118,13 @@ export const products: readonly Product[] = [
     id: 6, name: "Arco de globos Graduación #PROM8 naranja y azul marino, 155 globos", category: "Graduación", brand: "Mr. Confetti",
     price: 399, original: 519, rating: 4.9, reviews: 81, freeShipping: true,
     image: "/products/p06.webp", width: 512, height: 512, stock: 12,
+    description: "Arco de 155 globos de látex y foil en naranja y azul marino que se apoya en una estructura de 2 m. La combinación vibrante funciona en interiores y en patios, y el kit trae cinta, hilo y bomba.",
+    highlights: [
+      "Los 155 globos le dan cuerpo al arco de 2 m en exteriores.",
+      "El naranja y el azul marino resaltan en fotos con luz natural.",
+      "El látex y el foil resisten la jornada al aire libre.",
+      "El kit incluye todo el material de sujeción y la bomba.",
+    ],
     specs: [
       { label: "Piezas", value: "155 globos" }, { label: "Combinación", value: "Naranja y azul marino" },
       { label: "Material", value: "Látex y foil" }, { label: "Tamaño", value: "Arco de 2 m" },
@@ -99,6 +141,13 @@ export const products: readonly Product[] = [
     id: 7, name: "Set de 3 globos foil Kuromi (figura y 2 redondos)", category: "Personajes", brand: "Fiesta Pro",
     price: 59, original: 89, rating: 4.6, reviews: 265, freeShipping: false,
     image: "/products/p07.webp", width: 800, height: 800, stock: 22,
+    description: "Set de tres globos de foil metalizado de Kuromi: la figura de 60 cm y dos redondos a juego. Se inflan con aire o helio, así que sirven tanto de centro de mesa como de fondo flotante.",
+    highlights: [
+      "La figura de 60 cm se distingue desde la entrada del salón.",
+      "Los dos redondos completan el conjunto sin comprar piezas sueltas.",
+      "El foil metalizado no se opaca como el látex con el paso de las horas.",
+      "El morado y el rosa siguen la paleta del personaje.",
+    ],
     specs: [
       { label: "Material", value: "Foil metalizado" }, { label: "Piezas", value: "3 globos" },
       { label: "Medidas", value: "60 cm la figura" }, { label: "Personaje", value: "Kuromi" },
@@ -115,6 +164,13 @@ export const products: readonly Product[] = [
     id: 8, name: "Trompos luminosos con hélice, pack de 6", category: "Dulces y piñata", brand: "Fiesta Pro",
     price: 35, original: 55, rating: 4.3, reviews: 158, freeShipping: false,
     image: "/products/p08.webp", width: 450, height: 450, stock: 30,
+    description: "Pack de seis trompos luminosos con hélice, ideales para repartir al romper la piñata o para guardar como recuerdo. Son de plástico, funcionan con las baterías incluidas y están recomendados desde los 3 años.",
+    highlights: [
+      "Las seis unidades permiten dar un trompo a cada invitado.",
+      "La hélice LED gira con el trompo y luce en la penumbra.",
+      "Las baterías vienen puestas, así que se usan al sacarlos del paquete.",
+      "El plástico y la edad recomendada los hacen aptos para niños pequeños.",
+    ],
     specs: [
       { label: "Contenido", value: "6 trompos" }, { label: "Peso", value: "180 g" },
       { label: "Material", value: "Plástico y LED" }, { label: "Baterías", value: "Incluidas" },
@@ -131,6 +187,13 @@ export const products: readonly Product[] = [
     id: 9, name: "Globo foil Stitch grande 60 cm", category: "Personajes", brand: "Fiesta Pro",
     price: 39, original: 59, rating: 4.7, reviews: 422, freeShipping: false,
     image: "/products/p09.webp", width: 736, height: 980, stock: 16,
+    description: "Globo de foil metalizado con la figura de Stitch de 60 cm de alto, pensado para colgarlo como pieza principal de la decoración. Inflado con helio flota, y la cinta de sujeción viene incluida para amarrarlo.",
+    highlights: [
+      "Los 60 cm de alto lo convierten en el centro de la mesa.",
+      "El foil reproduce el personaje con el color azul original.",
+      "La cinta incluida evita buscar con qué sujetarlo.",
+      "Se infla con helio para que flote o con aire si se cuelga.",
+    ],
     specs: [
       { label: "Material", value: "Foil metalizado" }, { label: "Medidas", value: "60 cm de alto" },
       { label: "Personaje", value: "Stitch" }, { label: "Inflado", value: "Helio o aire" },
@@ -147,6 +210,13 @@ export const products: readonly Product[] = [
     id: 10, name: "Ramo de globos foil labios y corazones rosa metálico", category: "Globos", brand: "Mr. Confetti",
     price: 129, original: 179, rating: 4.6, reviews: 119, freeShipping: true,
     image: "/products/p10.webp", width: 736, height: 1308, stock: 11,
+    description: "Ramo de ocho globos de foil metalizado con formas de labios y corazones en rosa metálico y rojo. Se infla con helio o aire y funciona como regalo de aniversario, San Valentín o pedida.",
+    highlights: [
+      "Los ocho globos forman un ramo que se sostiene con una mano.",
+      "El rosa metálico y el rojo dan un acabado de regalo sin flores.",
+      "El foil mantiene la forma de labios y corazones mucho más que el látex.",
+      "Con helio flota; con aire se entrega a mano.",
+    ],
     specs: [
       { label: "Material", value: "Foil metalizado" }, { label: "Piezas", value: "8 globos" },
       { label: "Combinación", value: "Labios y corazones" }, { label: "Color", value: "Rosa metálico" },
@@ -163,6 +233,13 @@ export const products: readonly Product[] = [
     id: 11, name: "Cortina metálica de flecos morada 1 x 2 m", category: "Decoración", brand: "Fiesta Pro",
     price: 45, original: 69, rating: 4.5, reviews: 336, freeShipping: false,
     image: "/products/p11.webp", width: 736, height: 980, stock: 6,
+    description: "Cortina de flecos de vinilo metálico de 1 x 2 m en morado para cubrir una pared o el fondo de la mesa dulce. La cinta adhesiva viene incluida, así que se cuelga sobre cualquier superficie lisa.",
+    highlights: [
+      "El metro por dos metros cubre una pared pequeña o el fondo de la foto.",
+      "Los flecos metálicos reflejan la luz de las lámparas de la fiesta.",
+      "La cinta adhesiva incluida evita comprar ganchos.",
+      "El morado se combina con el rosa y el plateado de otras decoraciones.",
+    ],
     specs: [
       { label: "Material", value: "Vinilo metálico" }, { label: "Medidas", value: "1 x 2 m" },
       { label: "Piezas", value: "1 cortina" }, { label: "Montaje", value: "Cinta adhesiva incluida" },
@@ -179,6 +256,13 @@ export const products: readonly Product[] = [
     id: 12, name: "Globos jumbo pastel con confeti y borlas, set de 5", category: "Globos", brand: "Mr. Confetti",
     price: 119, original: 169, rating: 4.8, reviews: 203, freeShipping: true,
     image: "/products/p12.webp", width: 613, height: 750, stock: 20,
+    description: "Set de cinco globos jumbo de látex transparente de 60 cm, rellenos de confeti y acompañados de borlas para el acabado. Se inflan con helio o aire y sirven de centro de mesa en cumpleaños y bodas.",
+    highlights: [
+      "Los 60 cm hacen que un solo globo parezca un arreglo completo.",
+      "El látex transparente deja ver el confeti desde cualquier ángulo.",
+      "Las borlas añaden movimiento sin gastar en guirnaldas.",
+      "Con helio flotan sobre la mesa; con aire se apoyan en una base.",
+    ],
     specs: [
       { label: "Material", value: "Látex transparente" }, { label: "Piezas", value: "5 globos jumbo" },
       { label: "Tamaño", value: "60 cm" }, { label: "Incluye", value: "Confeti y borlas" },
@@ -195,6 +279,13 @@ export const products: readonly Product[] = [
     id: 13, name: "Globo gigante negro \"Boy or Girl?\" para revelación de género - edición fiesta", category: "Revelación de género", brand: "Mr. Confetti",
     price: 164, original: 219, rating: 4.8, reviews: 187, freeShipping: true,
     image: "/products/p01.webp", width: 736, height: 920, stock: 13,
+    description: "Edición fiesta del globo revelador, con la misma figura de látex de 45 cm más una bomba manual para inflarlo en el lugar. Llega con confeti y cinta, y el acabado negro grafito con dorado combina con una decoración más festiva.",
+    highlights: [
+      "La bomba manual permite inflarlo sin pasar por una tienda de globos.",
+      "El confeti y la cinta vienen listos para el momento de la revelación.",
+      "El negro grafito con dorado le da un aire más de fiesta que la versión básica.",
+      "El tamaño de 45 cm conserva el estallido claro de la versión básica.",
+    ],
     specs: [
       { label: "Material", value: "Látex natural" }, { label: "Tamaño", value: "45 cm de diámetro" },
       { label: "Incluye", value: "Globo, confeti, cinta y bomba manual" }, { label: "Uso", value: "Revelación de género" },
@@ -210,6 +301,13 @@ export const products: readonly Product[] = [
     id: 14, name: "Surtido de dulces mexicanos para piñata (50 piezas) - edición fiesta", category: "Dulces y piñata", brand: "Dulces Selectos",
     price: 98, original: 131, rating: 4.6, reviews: 324, freeShipping: true,
     image: "/products/p02.webp", width: 628, height: 837, stock: 19,
+    description: "Edición fiesta del surtido mexicano con 60 piezas y 1.4 kg de dulces, pensada para piñatas grandes o para dos grupos. Conserva el origen mexicano y la advertencia de alérgenos por leche y soya.",
+    highlights: [
+      "Las 60 piezas rinden para una piñata grande o dos medianas.",
+      "El peso de 1.4 kg cubre una mesa dulce con varios invitados.",
+      "El surtido de fiesta suma diez golosinas frente a la versión básica.",
+      "La etiqueta mantiene el aviso de leche y soya para los alérgicos.",
+    ],
     specs: [
       { label: "Contenido", value: "60 piezas surtidas" }, { label: "Peso", value: "1.4 kg" },
       { label: "Alérgenos", value: "Puede contener leche y soya" }, { label: "Origen", value: "México" },
@@ -225,6 +323,13 @@ export const products: readonly Product[] = [
     id: 15, name: "Kit de globos Constructor amarillo y negro con excavadoras - edición fiesta", category: "Cumpleaños", brand: "Mr. Confetti",
     price: 252, original: 362, rating: 4.7, reviews: 112, freeShipping: true,
     image: "/products/p03.webp", width: 736, height: 736, stock: 10,
+    description: "Versión ampliada del kit Constructor, con 52 globos de látex y foil y calcomanías de excavadora además de cinta, hilo y bomba. El tema amarillo y negro se mantiene, con piezas extra para decorar más de un espacio.",
+    highlights: [
+      "Los 52 globos cubren el arco y dejan piezas para la mesa.",
+      "Las calcomanías de excavadora refuerzan el tema sin inflar más globos.",
+      "La bomba y el hilo incluidos resuelven el montaje completo.",
+      "El amarillo y el negro siguen combinando con las guirnaldas.",
+    ],
     specs: [
       { label: "Material", value: "Látex y foil" }, { label: "Piezas", value: "52 globos" },
       { label: "Incluye", value: "Cinta, hilo, bomba y calcomanías" }, { label: "Tema", value: "Constructor" },
@@ -240,6 +345,13 @@ export const products: readonly Product[] = [
     id: 16, name: "Arco de globos Graduación #PROM6 rosa y dorado, 153 globos - edición fiesta", category: "Graduación", brand: "Mr. Confetti",
     price: 428, original: 549, rating: 4.8, reviews: 58, freeShipping: true,
     image: "/products/p04.webp", width: 512, height: 512, stock: 8,
+    description: "Edición fiesta del arco PROM6 con 160 globos de látex y foil en rosa y dorado sobre la misma base de 2 m. Suma calcomanías a la cinta, el hilo y la bomba para decorar la mesa y las paredes.",
+    highlights: [
+      "Los 160 globos rinden para el arco y algunos detalles extra.",
+      "Las calcomanías de graduación visten la mesa sin más compras.",
+      "El rosa cuarzo con dorado mantiene la paleta de la versión básica.",
+      "La bomba incluida acelera el inflado de las piezas.",
+    ],
     specs: [
       { label: "Piezas", value: "160 globos" }, { label: "Combinación", value: "Rosa y dorado" },
       { label: "Material", value: "Látex y foil" }, { label: "Tamaño", value: "Arco de 2 m" },
@@ -256,6 +368,13 @@ export const products: readonly Product[] = [
     id: 17, name: "Arco de globos Graduación #PROM7 azul y dorado, 128 globos - edición fiesta", category: "Graduación", brand: "Mr. Confetti",
     price: 373, original: 494, rating: 4.7, reviews: 44, freeShipping: true,
     image: "/products/p05.webp", width: 512, height: 512, stock: 12,
+    description: "Edición fiesta del arco PROM7 en azul y dorado, con 138 globos de látex y foil y calcomanías adicionales. Conserva la estructura de 2 m y el kit de cinta, hilo y bomba.",
+    highlights: [
+      "Los 138 globos completan el arco con margen para la mesa.",
+      "El azul y el dorado encajan con una decoración de graduación sobria.",
+      "Las calcomanías añaden el detalle de la promoción sin gastar de más.",
+      "El foil mantiene el brillo dorado durante el evento.",
+    ],
     specs: [
       { label: "Piezas", value: "138 globos" }, { label: "Combinación", value: "Azul y dorado" },
       { label: "Material", value: "Látex y foil" }, { label: "Tamaño", value: "Arco de 2 m" },
@@ -272,6 +391,13 @@ export const products: readonly Product[] = [
     id: 18, name: "Arco de globos Graduación #PROM8 naranja y azul marino, 155 globos - edición fiesta", category: "Graduación", brand: "Mr. Confetti",
     price: 439, original: 571, rating: 4.8, reviews: 49, freeShipping: true,
     image: "/products/p06.webp", width: 512, height: 512, stock: 15,
+    description: "Edición fiesta del arco PROM8 en naranja y azul marino, con 165 globos de látex y foil sobre la estructura de 2 m. Añade calcomanías al kit de cinta, hilo y bomba.",
+    highlights: [
+      "Los 165 globos dan un arco más denso para exteriores.",
+      "El naranja y el azul marino destacan con luz de día.",
+      "Las calcomanías de graduación completan la decoración de la mesa.",
+      "La bomba incluida facilita inflar la cantidad extra de piezas.",
+    ],
     specs: [
       { label: "Piezas", value: "165 globos" }, { label: "Combinación", value: "Naranja y azul marino" },
       { label: "Material", value: "Látex y foil" }, { label: "Tamaño", value: "Arco de 2 m" },
@@ -288,6 +414,13 @@ export const products: readonly Product[] = [
     id: 19, name: "Set de 3 globos foil Kuromi (figura y 2 redondos) - edición fiesta", category: "Personajes", brand: "Fiesta Pro",
     price: 65, original: 98, rating: 4.5, reviews: 159, freeShipping: false,
     image: "/products/p07.webp", width: 800, height: 800, stock: 21,
+    description: "Edición fiesta del set de Kuromi, con cuatro globos de foil metalizado en lugar de tres. La figura de 60 cm se mantiene y el conjunto se infla con aire o helio.",
+    highlights: [
+      "El globo extra completa el conjunto sin comprar aparte.",
+      "La figura de 60 cm sigue siendo la pieza central de la mesa.",
+      "El foil metalizado conserva el color morado y rosa durante días.",
+      "Admite aire o helio según el espacio que tengas.",
+    ],
     specs: [
       { label: "Material", value: "Foil metalizado" }, { label: "Piezas", value: "4 globos" },
       { label: "Medidas", value: "60 cm la figura" }, { label: "Personaje", value: "Kuromi" },
@@ -304,6 +437,13 @@ export const products: readonly Product[] = [
     id: 20, name: "Trompos luminosos con hélice, pack de 6 - edición fiesta", category: "Dulces y piñata", brand: "Fiesta Pro",
     price: 38, original: 61, rating: 4.2, reviews: 95, freeShipping: false,
     image: "/products/p08.webp", width: 450, height: 450, stock: 7,
+    description: "Edición fiesta del pack de trompos, con seis unidades de plástico reforzado y hélice LED. Pesa 190 g, llega con las baterías incluidas y mantiene la edad recomendada de 3 años.",
+    highlights: [
+      "El plástico reforzado aguanta el uso de una tarde de piñata.",
+      "Las seis unidades se reparten entre los invitados.",
+      "Las baterías vienen incluidas para usarlos de inmediato.",
+      "La hélice LED llama la atención cuando baja la luz.",
+    ],
     specs: [
       { label: "Contenido", value: "6 trompos con hélice LED" }, { label: "Peso", value: "190 g" },
       { label: "Material", value: "Plástico reforzado" }, { label: "Baterías", value: "Incluidas" },
@@ -320,6 +460,13 @@ export const products: readonly Product[] = [
     id: 21, name: "Globo foil Stitch grande 60 cm - edición fiesta", category: "Personajes", brand: "Fiesta Pro",
     price: 43, original: 65, rating: 4.6, reviews: 253, freeShipping: false,
     image: "/products/p09.webp", width: 736, height: 980, stock: 18,
+    description: "Edición fiesta del globo de Stitch de 60 cm, que añade un parche de reparación a la cinta de sujeción. Se infla con helio o aire y mantiene el foil metalizado.",
+    highlights: [
+      "El parche incluido permite arreglar un pinchazo sin perder el globo.",
+      "Los 60 cm de alto siguen llenando el centro de la decoración.",
+      "La cinta de sujeción viene lista para colgarlo.",
+      "El foil conserva el azul original durante toda la fiesta.",
+    ],
     specs: [
       { label: "Material", value: "Foil metalizado" }, { label: "Medidas", value: "60 cm de alto" },
       { label: "Personaje", value: "Stitch" }, { label: "Inflado", value: "Helio o aire" },
@@ -336,6 +483,13 @@ export const products: readonly Product[] = [
     id: 22, name: "Ramo de globos foil labios y corazones rosa metálico - edición fiesta", category: "Globos", brand: "Mr. Confetti",
     price: 142, original: 197, rating: 4.5, reviews: 71, freeShipping: true,
     image: "/products/p10.webp", width: 736, height: 1308, stock: 14,
+    description: "Edición fiesta del ramo de labios y corazones, con diez globos de foil metalizado en rosa metálico y rojo. Se infla con helio o aire y da un ramo más abundante que la versión básica.",
+    highlights: [
+      "Los diez globos hacen un ramo más generoso para la foto.",
+      "El rosa metálico y el rojo siguen la paleta de regalo.",
+      "El foil mantiene la forma de labios y corazones.",
+      "Con helio flota y con aire se sostiene a mano.",
+    ],
     specs: [
       { label: "Material", value: "Foil metalizado" }, { label: "Piezas", value: "10 globos" },
       { label: "Combinación", value: "Labios y corazones" }, { label: "Color", value: "Rosa metálico" },
@@ -352,6 +506,13 @@ export const products: readonly Product[] = [
     id: 23, name: "Cortina metálica de flecos morada 1 x 2 m - edición fiesta", category: "Decoración", brand: "Fiesta Pro",
     price: 50, original: 76, rating: 4.4, reviews: 202, freeShipping: false,
     image: "/products/p11.webp", width: 736, height: 980, stock: 11,
+    description: "Edición fiesta de la cortina morada, que crece a 1 x 2.5 m de vinilo metálico para cubrir una pared más alta. Mantiene la cinta adhesiva incluida y las piezas de flecos.",
+    highlights: [
+      "El medio metro extra cubre paredes altas sin empalmar dos cortinas.",
+      "Los flecos de vinilo metálico reflejan la luz del salón.",
+      "La cinta adhesiva incluida simplifica el montaje.",
+      "El morado se coordina con el rosa y el plateado.",
+    ],
     specs: [
       { label: "Material", value: "Vinilo metálico" }, { label: "Medidas", value: "1 x 2.5 m" },
       { label: "Piezas", value: "1 cortina" }, { label: "Montaje", value: "Cinta adhesiva incluida" },
@@ -368,6 +529,13 @@ export const products: readonly Product[] = [
     id: 24, name: "Globos jumbo pastel con confeti y borlas, set de 5 - edición fiesta", category: "Globos", brand: "Mr. Confetti",
     price: 131, original: 186, rating: 4.7, reviews: 122, freeShipping: true,
     image: "/products/p12.webp", width: 613, height: 750, stock: 25,
+    description: "Edición fiesta del set de globos jumbo, con seis piezas de látex transparente de 60 cm. Mantiene el confeti y las borlas incluidos para armar el centro de mesa.",
+    highlights: [
+      "El sexto globo permite cubrir una mesa más larga.",
+      "El látex transparente deja ver el confeti repartido dentro.",
+      "Las borlas completan el acabado sin comprar guirnaldas.",
+      "Los 60 cm siguen dando la sensación de arreglo completo.",
+    ],
     specs: [
       { label: "Material", value: "Látex transparente" }, { label: "Piezas", value: "6 globos jumbo" },
       { label: "Tamaño", value: "60 cm" }, { label: "Incluye", value: "Confeti y borlas" },
@@ -384,6 +552,13 @@ export const products: readonly Product[] = [
     id: 25, name: "Globo gigante negro \"Boy or Girl?\" para revelación de género - versión premium", category: "Revelación de género", brand: "Mr. Confetti",
     price: 134, original: 179, rating: 4.9, reviews: 281, freeShipping: true,
     image: "/products/p01.webp", width: 736, height: 920, stock: 16,
+    description: "Versión premium del globo revelador, con látex reforzado de 50 cm de diámetro y un kit de cierre para sellarlo. Incluye confeti y cinta, y el acabado negro grafito con blanco perla le da un aire más elegante.",
+    highlights: [
+      "El látex reforzado de 50 cm aguanta mejor los golpes del montaje.",
+      "El kit de cierre sella el globo sin nudos improvisados.",
+      "El blanco perla y el negro grafito combinan con decoración neutra.",
+      "El confeti y la cinta siguen viniendo en el paquete.",
+    ],
     specs: [
       { label: "Material", value: "Látex reforzado" }, { label: "Tamaño", value: "50 cm de diámetro" },
       { label: "Incluye", value: "Globo, confeti, cinta y kit de cierre" }, { label: "Uso", value: "Revelación de género" },
@@ -399,6 +574,13 @@ export const products: readonly Product[] = [
     id: 26, name: "Surtido de dulces mexicanos para piñata (50 piezas) - versión premium", category: "Dulces y piñata", brand: "Dulces Selectos",
     price: 80, original: 107, rating: 4.7, reviews: 486, freeShipping: true,
     image: "/products/p02.webp", width: 628, height: 837, stock: 28,
+    description: "Versión premium del surtido mexicano, con 50 piezas seleccionadas y 1.3 kg de dulces en una bolsa resellable. Conserva el origen mexicano y la advertencia de alérgenos por leche y soya.",
+    highlights: [
+      "La bolsa resellable mantiene los dulces frescos después de la fiesta.",
+      "Las 50 piezas seleccionadas evitan las golosinas que nadie elige.",
+      "El peso de 1.3 kg alcanza para una piñata mediana.",
+      "La etiqueta avisa de leche y soya antes de repartir.",
+    ],
     specs: [
       { label: "Contenido", value: "50 piezas seleccionadas" }, { label: "Peso", value: "1.3 kg" },
       { label: "Alérgenos", value: "Puede contener leche y soya" }, { label: "Origen", value: "México" },
@@ -415,6 +597,13 @@ export const products: readonly Product[] = [
     id: 27, name: "Kit de globos Constructor amarillo y negro con excavadoras - versión premium", category: "Cumpleaños", brand: "Mr. Confetti",
     price: 206, original: 296, rating: 4.8, reviews: 168, freeShipping: true,
     image: "/products/p03.webp", width: 736, height: 736, stock: 4,
+    description: "Versión premium del kit Constructor, con 46 globos de látex premium y foil y un dispensador para inflar más rápido. Se mantiene el tema amarillo y negro, con cinta e hilo incluidos.",
+    highlights: [
+      "El dispensador acelera el inflado de los 46 globos.",
+      "El látex premium se sostiene mejor que el estándar durante la fiesta.",
+      "El foil de excavadora conserva la forma temática.",
+      "El amarillo y el negro siguen combinando con la decoración.",
+    ],
     specs: [
       { label: "Material", value: "Látex premium y foil" }, { label: "Piezas", value: "46 globos" },
       { label: "Incluye", value: "Cinta, hilo y dispensador" }, { label: "Tema", value: "Constructor" },
@@ -430,6 +619,13 @@ export const products: readonly Product[] = [
     id: 28, name: "Arco de globos Graduación #PROM6 rosa y dorado, 153 globos - versión premium", category: "Graduación", brand: "Mr. Confetti",
     price: 350, original: 449, rating: 4.9, reviews: 86, freeShipping: true,
     image: "/products/p04.webp", width: 512, height: 512, stock: 13,
+    description: "Versión premium del arco PROM6 en rosa y dorado, con 153 globos de látex premium y foil. Añade una guía de armado a la cinta, el hilo y la bomba.",
+    highlights: [
+      "La guía de armado evita improvisar la forma del arco de 2 m.",
+      "El látex premium mantiene la tensión del arco por más tiempo.",
+      "El rosa cuarzo con dorado conserva la paleta de graduación.",
+      "La bomba incluida cubre los 153 globos sin equipo extra.",
+    ],
     specs: [
       { label: "Piezas", value: "153 globos" }, { label: "Combinación", value: "Rosa y dorado" },
       { label: "Material", value: "Látex premium y foil" }, { label: "Tamaño", value: "Arco de 2 m" },
@@ -446,6 +642,13 @@ export const products: readonly Product[] = [
     id: 29, name: "Arco de globos Graduación #PROM7 azul y dorado, 128 globos - versión premium", category: "Graduación", brand: "Mr. Confetti",
     price: 305, original: 404, rating: 4.8, reviews: 67, freeShipping: true,
     image: "/products/p05.webp", width: 512, height: 512, stock: 17,
+    description: "Versión premium del arco PROM7 en azul y dorado, con 128 globos de látex premium y foil. Incluye la guía de armado junto con cinta, hilo y bomba.",
+    highlights: [
+      "La guía ayuda a repetir el mismo arco de 2 m cada vez.",
+      "El látex premium reduce las piezas que se revientan al inflar.",
+      "El azul y el dorado mantienen el contraste sobrio.",
+      "El kit completo evita compras de último momento.",
+    ],
     specs: [
       { label: "Piezas", value: "128 globos" }, { label: "Combinación", value: "Azul y dorado" },
       { label: "Material", value: "Látex premium y foil" }, { label: "Tamaño", value: "Arco de 2 m" },
@@ -462,6 +665,13 @@ export const products: readonly Product[] = [
     id: 30, name: "Arco de globos Graduación #PROM8 naranja y azul marino, 155 globos - versión premium", category: "Graduación", brand: "Mr. Confetti",
     price: 359, original: 467, rating: 4.9, reviews: 73, freeShipping: true,
     image: "/products/p06.webp", width: 512, height: 512, stock: 10,
+    description: "Versión premium del arco PROM8 en naranja y azul marino, con 155 globos de látex premium y foil. La guía de armado se suma a la cinta, el hilo y la bomba.",
+    highlights: [
+      "La guía facilita el montaje del arco de 2 m en exteriores.",
+      "El látex premium aguanta mejor el sol y el viento.",
+      "El naranja y el azul marino se ven intensos con luz natural.",
+      "La cantidad de globos cubre el arco completo.",
+    ],
     specs: [
       { label: "Piezas", value: "155 globos" }, { label: "Combinación", value: "Naranja y azul marino" },
       { label: "Material", value: "Látex premium y foil" }, { label: "Tamaño", value: "Arco de 2 m" },
@@ -478,6 +688,13 @@ export const products: readonly Product[] = [
     id: 31, name: "Set de 3 globos foil Kuromi (figura y 2 redondos) - versión premium", category: "Personajes", brand: "Fiesta Pro",
     price: 53, original: 80, rating: 4.6, reviews: 238, freeShipping: false,
     image: "/products/p07.webp", width: 800, height: 800, stock: 23,
+    description: "Versión premium del set de Kuromi, con foil metalizado más grueso y la figura de 65 cm. Mantiene los tres globos y la opción de inflarlos con aire o helio.",
+    highlights: [
+      "El foil grueso soporta mejor el manipuleo de la fiesta.",
+      "Los 65 cm hacen la figura más visible que la versión básica.",
+      "Los tres globos mantienen el conjunto completo.",
+      "Se infla con aire o helio según el montaje.",
+    ],
     specs: [
       { label: "Material", value: "Foil metalizado grueso" }, { label: "Piezas", value: "3 globos" },
       { label: "Medidas", value: "65 cm la figura" }, { label: "Personaje", value: "Kuromi" },
@@ -494,6 +711,13 @@ export const products: readonly Product[] = [
     id: 32, name: "Trompos luminosos con hélice, pack de 6 - versión premium", category: "Dulces y piñata", brand: "Fiesta Pro",
     price: 32, original: 50, rating: 4.3, reviews: 142, freeShipping: false,
     image: "/products/p08.webp", width: 450, height: 450, stock: 26,
+    description: "Versión premium del pack de trompos, con seis unidades de LED de alta luminosidad y 200 g de peso. Las baterías vienen incluidas y se mantiene la recomendación desde los 3 años.",
+    highlights: [
+      "El LED de alta luminosidad se ve incluso con luces encendidas.",
+      "El plástico resiste mejor los golpes de la piñata.",
+      "Las baterías incluidas permiten usarlos de inmediato.",
+      "Las seis unidades alcanzan para un grupo completo.",
+    ],
     specs: [
       { label: "Contenido", value: "6 trompos premium" }, { label: "Peso", value: "200 g" },
       { label: "Material", value: "Plástico y LED de alta luminosidad" }, { label: "Baterías", value: "Incluidas" },
@@ -510,6 +734,13 @@ export const products: readonly Product[] = [
     id: 33, name: "Globo foil Stitch grande 60 cm - versión premium", category: "Personajes", brand: "Fiesta Pro",
     price: 35, original: 53, rating: 4.7, reviews: 380, freeShipping: false,
     image: "/products/p09.webp", width: 736, height: 980, stock: 8,
+    description: "Versión premium del globo de Stitch, con foil metalizado grueso y 65 cm de alto. Incluye la cinta de sujeción y se infla con helio o aire.",
+    highlights: [
+      "El foil grueso conserva la figura por más tiempo.",
+      "Los 65 cm de alto lo hacen aún más protagonista.",
+      "La cinta incluida deja colgarlo sin buscar amarres.",
+      "Admite helio para flotar o aire para colgar.",
+    ],
     specs: [
       { label: "Material", value: "Foil metalizado grueso" }, { label: "Medidas", value: "65 cm de alto" },
       { label: "Personaje", value: "Stitch" }, { label: "Inflado", value: "Helio o aire" },
@@ -526,6 +757,13 @@ export const products: readonly Product[] = [
     id: 34, name: "Ramo de globos foil labios y corazones rosa metálico - versión premium", category: "Globos", brand: "Mr. Confetti",
     price: 116, original: 161, rating: 4.6, reviews: 107, freeShipping: true,
     image: "/products/p10.webp", width: 736, height: 1308, stock: 12,
+    description: "Versión premium del ramo de labios y corazones, con foil metalizado de mayor gramaje y ocho globos. Mantiene el rosa metálico, el rojo y la opción de helio o aire.",
+    highlights: [
+      "El foil premium mantiene el brillo metálico más tiempo.",
+      "Los ocho globos forman un ramo manejable.",
+      "El rosa y el rojo siguen funcionando como regalo.",
+      "Con helio flota y con aire se sostiene a mano.",
+    ],
     specs: [
       { label: "Material", value: "Foil metalizado premium" }, { label: "Piezas", value: "8 globos" },
       { label: "Combinación", value: "Labios y corazones" }, { label: "Color", value: "Rosa metálico" },
@@ -542,6 +780,13 @@ export const products: readonly Product[] = [
     id: 35, name: "Cortina metálica de flecos morada 1 x 2 m - versión premium", category: "Decoración", brand: "Fiesta Pro",
     price: 40, original: 62, rating: 4.5, reviews: 302, freeShipping: false,
     image: "/products/p11.webp", width: 736, height: 980, stock: 20,
+    description: "Versión premium de la cortina morada, con vinilo metálico reforzado de 1 x 2 m. Conserva la cinta adhesiva incluida y el acabado de flecos.",
+    highlights: [
+      "El vinilo reforzado se enreda menos al desempacar.",
+      "El metro por dos metros cubre el fondo de la mesa dulce.",
+      "Los flecos reflejan la luz sin perder el color morado.",
+      "La cinta incluida permite colgarla en minutos.",
+    ],
     specs: [
       { label: "Material", value: "Vinilo metálico reforzado" }, { label: "Medidas", value: "1 x 2 m" },
       { label: "Piezas", value: "1 cortina" }, { label: "Montaje", value: "Cinta adhesiva incluida" },
@@ -558,6 +803,13 @@ export const products: readonly Product[] = [
     id: 36, name: "Globos jumbo pastel con confeti y borlas, set de 5 - versión premium", category: "Globos", brand: "Mr. Confetti",
     price: 107, original: 152, rating: 4.8, reviews: 183, freeShipping: true,
     image: "/products/p12.webp", width: 613, height: 750, stock: 3,
+    description: "Versión premium del set de globos jumbo, con látex premium y cinco piezas de 65 cm. Mantiene el confeti y las borlas para el centro de mesa.",
+    highlights: [
+      "El látex premium se mantiene inflado más tiempo.",
+      "Los 65 cm aumentan el volumen del arreglo.",
+      "El confeti y las borlas siguen incluidos.",
+      "Las cinco piezas cubren una mesa de cumpleaños.",
+    ],
     specs: [
       { label: "Material", value: "Látex premium" }, { label: "Piezas", value: "5 globos jumbo" },
       { label: "Tamaño", value: "65 cm" }, { label: "Incluye", value: "Confeti y borlas" },

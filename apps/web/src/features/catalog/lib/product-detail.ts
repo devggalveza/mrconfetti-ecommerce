@@ -1,3 +1,4 @@
+import { MAX_QUANTITY } from "@/lib/constants";
 import { roundMoney } from "@/lib/format";
 
 import type { Product, ProductPack } from "../schemas/product";
@@ -96,6 +97,21 @@ export function instalments(price: number, count: number): number {
 /** Base price plus the selected pack's surcharge, in GTQ; the base pack adds zero. */
 export function priceWithPack(product: Product, pack: ProductPack): number {
   return product.price + pack.extra;
+}
+
+/**
+ * Highest quantity the add-to-cart stepper may offer for `product`.
+ *
+ * A product with no stock is unbuyable and yields `0`, and a negative `stock` is
+ * treated the same way because a ceiling can never be negative. Otherwise the
+ * limit is the smaller of {@link MAX_QUANTITY} and the units on hand, so a large
+ * stock still respects the per-order ceiling the shared constants define.
+ */
+export function quantityLimit(product: Product): number {
+  if (product.stock <= 0) {
+    return 0;
+  }
+  return Math.min(MAX_QUANTITY, product.stock);
 }
 
 /**
