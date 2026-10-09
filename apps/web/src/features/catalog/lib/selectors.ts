@@ -105,6 +105,28 @@ export function sortProducts(list: readonly Product[], sort: SortKey): Product[]
   }
 }
 
+/**
+ * Up to `limit` related products: same-category entries first, keeping their input
+ * order, then the rest of the catalogue ordered by price proximity to `current`
+ * (smallest absolute price difference first, breaking ties by product id ascending).
+ * `current` itself is never included, and a zero or negative `limit` yields no items.
+ */
+export function relatedProducts(
+  list: readonly Product[],
+  current: Product,
+  limit = 5,
+): Product[] {
+  const others = list.filter((product) => product.id !== current.id);
+  const sameCategory = others.filter((product) => product.category === current.category);
+  const otherCategories = others
+    .filter((product) => product.category !== current.category)
+    .sort(
+      (a, b) =>
+        Math.abs(a.price - current.price) - Math.abs(b.price - current.price) || a.id - b.id,
+    );
+  return [...sameCategory, ...otherCategories].slice(0, Math.max(0, limit));
+}
+
 /** Slices a 1-based page, clamping the page into `1..totalPages`; an empty list yields one page. */
 export function paginate<T>(
   list: readonly T[],

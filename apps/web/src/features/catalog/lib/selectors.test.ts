@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { MAX_QUANTITY } from "@/lib/constants";
+
 import { products } from "../data/products";
 import { SORT_OPTIONS, productsSchema, type Product } from "../schemas/product";
 import {
@@ -12,6 +14,7 @@ import {
   inPriceRange,
   minRating,
   paginate,
+  relatedProducts,
   searchProducts,
   sortProducts,
 } from "./selectors";
@@ -24,6 +27,41 @@ describe("products data", () => {
 
   it("exposes 12 distinct product images", () => {
     expect(new Set(products.map((product) => product.image)).size).toBe(12);
+  });
+
+  // The authored catalogue guarantees 4 or 5 spec rows per product (8 products
+  // carry 4 rows and 28 carry 5), so 4 is the real minimum the guard must pin;
+  // the old bound of 1 let a regression down to a single row slip through.
+  it("fills every product with the extended model fields the detail page needs, with the catalogue minimum of 4 spec rows", () => {
+    for (const product of products) {
+      expect(Number.isInteger(product.stock)).toBe(true);
+      expect(product.stock).toBeGreaterThanOrEqual(0);
+      expect(product.specs.length).toBeGreaterThanOrEqual(4);
+      expect(product.specs.length).toBeLessThanOrEqual(5);
+      expect(product.colors.length).toBeGreaterThanOrEqual(1);
+      expect(product.packs).toHaveLength(2);
+      expect(product.packs[0]?.extra).toBe(0);
+      expect(product.packs[1]?.extra).toBe(19);
+      expect(product.customerReviews).toHaveLength(2);
+    }
+  });
+
+  // The tightest bound the real catalogue supports: the observed maximum gap is
+  // 0.2999999999999998 (a featured average of 4.0 behind an aggregate rating of
+  // 4.3, products 8 and 32), so 0.3 passes all 36 products while the previous
+  // bound of 1 hid a full star of drift.
+  it("keeps every featured review average within 0.3 of its aggregate rating (observed max 0.3, at products 8 and 32)", () => {
+    for (const product of products) {
+      const featured = product.customerReviews;
+      const average = featured.reduce((sum, review) => sum + review.rating, 0) / featured.length;
+      expect(Math.abs(average - product.rating)).toBeLessThanOrEqual(0.3);
+    }
+  });
+
+  it("includes a few products below MAX_QUANTITY so the quantity clamp is reachable", () => {
+    const lowStock = products.filter((product) => product.stock < MAX_QUANTITY);
+    expect(lowStock.length).toBeGreaterThan(0);
+    expect(lowStock.length).toBeLessThan(products.length / 2);
   });
 });
 
@@ -133,6 +171,47 @@ describe("SORT_OPTIONS", () => {
       { value: "dto", label: "Mayor descuento" },
       { value: "val", label: "Mejor valorados" },
     ]);
+  });
+});
+
+describe("relatedProducts", () => {
+  const current: Product = { ...products[0], id: 1, category: "Globos", price: 100 };
+  const fixture: Product[] = [
+    current,
+    { ...products[0], id: 2, category: "Globos", price: 101 },
+    { ...products[0], id: 7, category: "Decoración", price: 180 },
+    { ...products[0], id: 3, category: "Decoración", price: 130 },
+    { ...products[0], id: 9, category: "Decoración", price: 100 },
+    { ...products[0], id: 4, category: "Decoración", price: 95 },
+    { ...products[0], id: 6, category: "Decoración", price: 130 },
+    { ...products[0], id: 5, category: "Decoración", price: 96 },
+  ];
+
+  it("keeps same-category entries first and fills by price proximity to the current product", () => {
+    expect(relatedProducts(fixture, current, 7).map((product) => product.id)).toEqual([
+      2, 9, 5, 4, 3, 6, 7,
+    ]);
+  });
+
+  it("breaks a price-proximity tie by product id ascending", () => {
+    expect(relatedProducts(fixture, current, 6).map((product) => product.id)).toEqual([
+      2, 9, 5, 4, 3, 6,
+    ]);
+  });
+
+  it("excludes the current product and never mutates the input", () => {
+    const before = fixture.map((product) => product.id);
+    const related = relatedProducts(fixture, current, 7);
+    expect(related.some((product) => product.id === current.id)).toBe(false);
+    expect(fixture.map((product) => product.id)).toEqual(before);
+  });
+
+  it("returns an empty list for a zero limit", () => {
+    expect(relatedProducts(fixture, current, 0)).toEqual([]);
+  });
+
+  it("returns an empty list for a negative limit", () => {
+    expect(relatedProducts(fixture, current, -3)).toEqual([]);
   });
 });
 

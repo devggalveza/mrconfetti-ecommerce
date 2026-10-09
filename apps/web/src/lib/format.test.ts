@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { formatDiscount, formatMoney, formatRating, formatReviewCount } from "./format";
+import {
+  formatDiscount,
+  formatMoney,
+  formatRating,
+  formatReviewCount,
+  roundMoney,
+} from "./format";
 
 describe("formatMoney", () => {
   it("drops the trailing .00 for whole amounts", () => {
@@ -19,6 +25,21 @@ describe("formatMoney", () => {
 
   it("rounds to two decimals before formatting", () => {
     expect(formatMoney(149.999)).toBe("Q.150");
+  });
+});
+
+describe("roundMoney", () => {
+  it("rounds half a cent up when the scaled product lands exactly on x.5", () => {
+    expect(roundMoney(0.005)).toBe(0.01);
+    expect(roundMoney(0.015)).toBe(0.02);
+  });
+
+  it("rounds down when IEEE-754 scaling lands just below x.5", () => {
+    expect(roundMoney(1.005)).toBe(1);
+  });
+
+  it("rounds the remaining cent boundary half up", () => {
+    expect(roundMoney(129.665)).toBe(129.67);
   });
 });
 
