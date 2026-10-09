@@ -1,6 +1,6 @@
 # Feature: Mr. Confetti storefront (design-system + full design implementation)
 
-Status: in progress — phases 0-5 complete, PR 1 reviewed, PR 2 in review
+Status: in progress — phases 0-6a complete, PR 1 reviewed, PR 2 in review
 Owner: el Gentleman (parent session)
 Branch: `feat/storefront` (from `main`)
 Source design: `%APPDATA%/Open Design/.../bf52a322-.../` — `index.html`, `products.html`,
@@ -373,6 +373,7 @@ snapshot-only tests.
 | 4 — campaigns and assembly | `c63847f` | 160 tests; SSR reports all 10 sections in ascending order |
 | 5 — catalog (logic) | `87de5a3` | filter state, coercion and tests first; 3 shadcn primitives vendored |
 | 5 — catalog (UI) | `ec1c128` | 208 tests; `check-types` and `build` clean; route render test covers 12-per-page, chips, empty state and query round-trip |
+| 6a — product detail data | `076c753` | 259 tests; every legacy field verified byte-identical to `HEAD` across the 36 products |
 
 Phase 0 delivered assets under `apps/web/public/` (logo, 3 banners, 12 product images,
 `favicon.ico`), brand tokens in `apps/web/src/index.css`, `apps/web/DESIGN_SYSTEM.md`,
@@ -438,6 +439,39 @@ Deviations found while building phase 5:
 - **`minRating=-0` survives as `-0`.** Consolidating the coercion rules into the schema
   module made `?minRating=-0` reachable as `-0` instead of a canonical `0`. Comparisons
   and the chip suppression are unaffected, so it is recorded rather than patched.
+
+Deviations found while building phase 6a:
+
+- **The review bars are derived, not copied.** The design hard-codes `72/18/6/2/2` at a
+  rating of 4.6. `reviewDistribution` derives the buckets from the aggregate rating with a
+  maximum-entropy distribution solved by bisection and rounded by largest remainder, which
+  gives `71/21/6/2/0` for that rating. The aggregate is the only value the model carries,
+  so a literal would be a second source of truth that nothing keeps honest. Independently
+  checked over 1,967 ratings: five integer, non-negative buckets summing to exactly 100.
+- **`packs` is one shared frozen table, not a per-product array.** Option A approved
+  `options: { colors, packs }` on the product. `colors` stays per product because it
+  genuinely varies; `packs` never varies, so the two options live once in
+  `data/product-options.ts`, frozen, and every product references them. The field stays
+  required, so a product can still override the table later. `Product["packs"]` is now
+  `readonly ProductPack[]`, so both the compiler and the runtime refuse an in-place
+  mutation that would otherwise corrupt all 36 products at once.
+- **The related rail is affinity-ordered, not the design's slice.** The source shows the
+  next five products by id. `relatedProducts` puts the same category first, then fills by
+  price proximity to the current product with the id as tiebreak. Approved as a deviation
+  when the data model was chosen.
+- **New modules the plan's target structure did not list:** `data/product-options.ts` (the
+  shared pack table) and `lib/product-detail.ts` (the pure derivations).
+- **`lib/format.ts` gained `roundMoney`.** `instalments` had re-implemented the money
+  rounding rule that `formatMoney` already inlined; both now call the shared helper, whose
+  output was verified byte-identical over 16,026 inputs.
+- **Content authorship.** The source's single `Estándar` swatch and its featured reviewers
+  Lucía M. and Andrés P. belonged to the design's generic demo product. Each product now
+  carries brand-plausible colours and two Spanish reviews whose ratings stay within 0.3 of
+  its own aggregate. Deliberate, per option A.
+- **Known latent gap.** The pack freeze is shallow: the array and its slots are frozen and
+  `as const` makes the element properties readonly to the compiler, but a deliberate cast
+  could still rewrite `PRODUCT_PACKS[0].name` at runtime. Accepted rather than deep-frozen,
+  to keep the fix minimal.
 
 ## Open risks
 
