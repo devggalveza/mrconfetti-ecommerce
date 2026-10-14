@@ -622,6 +622,26 @@ Deviations found while building phase 7:
   lineage was ever created (`lineage_created: false`) and nothing was mutated, so no
   reset, recover or quarantine is owed. Phases were reviewed by delegated independent
   verifiers instead; the native review stays owed until the two halves are realigned.
+  - Re-probed while closing phase 7, on the same binary
+    (`4.0.0-20260928233426-d96a5d4f021b`). `inspect` now answers: it returns
+    `contract: gentle-ai.review-integration/v2` with a `status/v9` envelope whose
+    `action` is `start`, an empty candidate (`paths: []`, `base_tree == HEAD` tree, since
+    the phase was committed) and the collect reason
+    `empty_candidate_base_ref_required`. `review capabilities` shows why the halves still
+    disagree: the binary publishes `contract: gentle-ai.review-integration/v1`,
+    `protocol 1.5`, and lists only `review.capabilities`, `review.repair`, `review.start`,
+    `review.status` and `review.validate` as operations, with `staged` and `workspace` as
+    projections. Three START attempts, all rejected before any authority existed: an
+    ordinary `{"mode":"ordinary"}` start (empty candidate, wants a base ref), and a
+    committed range `{"baseRef": <full sha of 27f126c>, "committedOnly": true}` with and
+    without an explicit `lineageId`, which fails with `native-operation-failed` /
+    `error_code: schema-incompatible`. Every attempt reports `lineage_created: false`,
+    `mutation_performed: false` and `reset_eligible: false`, so no reset, recover,
+    quarantine or repair is owed and the tree is untouched. The committed-range route is
+    also the one that natively exists (`gentle-ai review start --base-ref …
+    --committed-only`), so the gap is squarely the facade's `review/start` shape against
+    this binary. Note also that `RDD` is `on` (decided by default, scope unset), so the
+    switch is not the blocker.
 - **Review size.** Six chained PRs is the mitigation; if PR 1 grows past roughly 600
   changed lines it should be split into "foundation + layout" and "home". PR 2 landed as
   two commits (`87de5a3` logic, `ec1c128` UI) totalling ~2085 added lines; the split is by
