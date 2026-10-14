@@ -2,6 +2,9 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 
 import { useCartStore } from "./cart-store";
 import { useFavoritesStore } from "./favorites-store";
+import { useOrdersStore } from "./orders-store";
+import { usePromoStore } from "./promo-store";
+import { useSavedStore } from "./saved-store";
 
 const StoresHydratedContext = createContext(false);
 
@@ -14,13 +17,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   // The app renders on the server, so reading localStorage during render would
-  // desynchronise the server and client markup. Both stores skip automatic
-  // hydration and rehydrate here, on the client only, after the first paint.
+  // desynchronise the server and client markup. Every store skips automatic
+  // hydration and rehydrates here, on the client only, after the first paint.
   useEffect(() => {
     let active = true;
     Promise.all([
       useCartStore.persist.rehydrate(),
       useFavoritesStore.persist.rehydrate(),
+      useSavedStore.persist.rehydrate(),
+      usePromoStore.persist.rehydrate(),
+      useOrdersStore.persist.rehydrate(),
     ]).then(() => {
       if (active) {
         setHydrated(true);
