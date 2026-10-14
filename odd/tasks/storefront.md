@@ -385,8 +385,8 @@ Phase 9 lands as two work units, each with its own commit:
 
 | Unit | Artifacts | Task | Status |
 | --- | --- | --- | --- |
-| 9a — help contract and logic | `features/help/schemas/help-search.ts`, `features/help/data/help-copy.ts`, `features/help/lib/tracking.ts`, `features/checkout/lib/order.ts` (+ tests) | The seven topics and their zod schema, the frozen Spanish copy, and the pure tracking rules | pending |
-| 9b — help sections and route | `features/help/components/*`, `features/help/hooks/*`, `routes/ayuda.tsx` (+ test) | Table of contents with `aria-current`, FAQ, tracking panel, returns, contact, about, privacy and terms, and the route that assembles them | pending |
+| 9a — help contract and logic | `features/help/schemas/help-search.ts`, `features/help/data/help-copy.ts`, `features/help/lib/tracking.ts`, `features/checkout/lib/order.ts` (+ tests) | The seven topics and their zod schema, the frozen Spanish copy, and the pure tracking rules | done — `773cc39` |
+| 9b — help sections and route | `features/help/components/*`, `features/help/hooks/*`, `routes/ayuda.tsx` (+ test) | Table of contents with `aria-current`, FAQ, tracking panel, returns, contact, about, privacy and terms, and the route that assembles them | done — `fd6d184` |
 
 Contract decisions taken while planning 9a (parent-owned, not left to the writer):
 
@@ -529,6 +529,9 @@ snapshot-only tests.
 | 8d — verifier consistency | `68c0311` | 479 tests; the route owns the `h1`, and both routes derive emptiness from the same joined items |
 | 8e — verifier findings | `0d17cee` | 482 tests; the form cannot move under a pending order, and the summary entries meet the 44px rule |
 | 8 — phase verification | — | full web suite 45 files / 482 tests green; `bunx tsc --noEmit` clean run directly; `bun run --filter web build` green |
+| 9a — help contract and logic | `773cc39` | 51 focused tests; the seven topics and their schema, the authored copy and the pure tracking rules; `ORDER_REF_PATTERN` exported once and pinned by a drift test; test-first RED recorded |
+| 9b — help sections and route | `fd6d184` | 546 tests; one sticky/rail table of contents, FAQ as native `details`, and the gated tracking panel; the verifier's sticky-placement finding and the stale-marker gap were fixed before the unit's commit |
+| 9 — phase verification | — | full web suite 52 files / 546 tests green; `bunx tsc --noEmit` clean run directly; `bun run --filter web build` green |
 
 Phase 0 delivered assets under `apps/web/public/` (logo, 3 banners, 12 product images,
 `favicon.ico`), brand tokens in `apps/web/src/index.css`, `apps/web/DESIGN_SYSTEM.md`,
@@ -730,8 +733,32 @@ Deviations found while building phase 8:
   `checkout-form.tsx` changed; no `disabled` prop was threaded through the panels.
 - **The amount rows moved.** `TotalsRows` was extracted from the cart's `OrderSummary`, so
   the cart and the checkout render the same rows from the same totals object.
-- **`CheckoutField` got its own file.** It had been left inside `address-panel.tsx` and
-  imported from there by the payment details, which made the module boundary a lie.
+Deviations found while building phase 9:
+
+- **The design sources are gone here too.** The help copy is authored from the plan's section
+  list, not transcribed, like the three pages before it.
+- **The contact section publishes one channel.** `hola@mrconfetti.example` (RFC 2606 reserves
+  `.example`) plus weekday hours, and it says in its own text that the demo publishes no phone
+  and no address. Inventing a support phone would have been the easy way to fill the section.
+- **The email renders as plain text.** The 9a block model has no link kind, so the address is a
+  list item rather than a `mailto:` link. Widening the model for one string was not worth a
+  nine-file change; it is recorded, not worked around.
+- **`formatOrderDate` is new.** `LastOrder.date` is an ISO string and `lib/format.ts` had no date
+  formatter, so the help feature adds one small module rather than formatting inline or widening
+  the shared formatter set.
+- **`tracking.stepState` was added in 9b, after the 9a commit.** The three state words are copy,
+  and 9a had no renderer to reveal that they were missing. The additive change and its test
+  assertion land inside `fd6d184`.
+- **`aria-current="location"`, not `"page"`.** These entries point at sections of the current
+  document, unlike `category-nav`'s page links, so the token differs deliberately.
+- **The sticky box is the `<nav>` grid item, not the inner list.** The verifier found the first
+  placement had zero sticky travel — an element exactly as tall as its parent cannot move — and
+  the fix moved `md:sticky` onto the grid item, matching `/products`.
+- **The order meta is two paragraphs, not a `dl`.** Both labels already read as sentences, so a
+  `dd` under no `dt` was removed; a real description list would have duplicated the label.
+- **The active topic follows a changed `tema` during render.** The verifier found that a footer
+  link clicked while already on `/ayuda` scrolled the page but left the previous entry marked.
+  The hook now adjusts state during render when the prop changes — no second effect.
 
 ## Open risks
 
@@ -805,6 +832,22 @@ Deviations found while building phase 8:
     --committed-only`), so the gap is squarely the facade's `review/start` shape against
     this binary. Note also that `RDD` is `on` (decided by default, scope unset), so the
     switch is not the blocker.
+  - Re-probed while closing phase 9, on the same binary
+    (`4.0.0-20260928233426-d96a5d4f021b`). `gentle-ai review capabilities` is unchanged:
+    contract `v1`, protocol `1.5`, and only `review.capabilities`, `review.repair`,
+    `review.start`, `review.status` and `review.validate`. `inspect` again answers with
+    contract `v2` and a `status/v9` envelope whose `action` is `start`, an empty candidate
+    (`paths: []`, identical `base_tree` and `current_candidate_tree`, since the phase is
+    committed) and `next_transition.kind: collect` with reason
+    `empty_candidate_base_ref_required`. The committed-range START it asks for is then
+    rejected before any native call: with `{"baseRef": <sha of fdba297>,
+    "committedOnly": true}` and a fresh `idempotencyKey`, the facade answers
+    `Judgment Day graph-v1 START requires lineageId` — an opaque lineage the same `inspect`
+    never issues. No lineage was created, nothing was mutated and no reset, recover,
+    quarantine or repair is owed; the attempt is not retried, because a second identical
+    attempt would be ambient recovery. Phase 9's implementation was therefore reviewed by a
+    delegated independent verifier that ran the full suite, `tsc` and the build, and by a
+    second one that re-verified the two follow-up fixes.
 - **Review size.** Six chained PRs is the mitigation; if PR 1 grows past roughly 600
   changed lines it should be split into "foundation + layout" and "home". PR 2 landed as
   two commits (`87de5a3` logic, `ec1c128` UI) totalling ~2085 added lines; the split is by
@@ -842,3 +885,23 @@ Deviations found while building phase 8:
 - **Scope of `/login`.** The design's "Iniciar sesión" points at the existing scaffold
   route, which is not part of the design. If the user wants a designed login page, that is
   a new feature, not part of this one.
+- **Phase 9 review size.** `fdba297..fd6d184` is 19 code files (8 of them tests), 1,726
+  insertions and 7 deletions across three commits, plus the plan document. Smaller than
+  phases 7 and 8, and the split is by layer (contract, sections, route) rather than by
+  review slice, so PR 6 still reads as one change.
+- **The help layout is unpinned by tests.** jsdom has no layout engine, so the sticky travel
+  of the table of contents, the chip rail below 768px and the `py-1` added for the focus ring
+  are read from CSS semantics plus the `/products` precedent. The responsive pass at phase 10
+  step 3 is the only check that can actually see them.
+- **Re-clicking the footer link for the current `tema` does not move the marker back.** The
+  render-phase sync only fires when the prop changes, so a footer navigation to the topic
+  already in `?tema=` leaves a TOC click's selection in place. Same-topic navigation on the
+  same page; recorded rather than patched with a scroll listener.
+- **The server-painted help page is untested.** The route test mounts the real tree through
+  jsdom and exercises the browser path, so the claim that `/ayuda` renders the `h1`, the
+  table of contents and the static sections on the server is verified by reading the code.
+  `/cart` and `/checkout` are in the same position.
+- **The tracking panel's thresholds are fiction by construction.** `TRACKING_STEP_HOURS`
+  (4 h / 24 h / 72 h) stands in for a fulfilment API that does not exist; the panel is honest
+  about only ever finding the one order in `mc-last-order`, but the four-step timeline is a
+  demo model, not a promise about a real courier.
