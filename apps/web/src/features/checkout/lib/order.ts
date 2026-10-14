@@ -4,6 +4,12 @@ import type { Product } from "@/features/catalog/schemas/product";
 import type { LastOrder } from "@/stores/orders-store";
 
 /**
+ * The single source of the order-reference format; `createOrderRef` must keep matching it.
+ * Non-global and case-sensitive: consumers normalize their input before testing.
+ */
+export const ORDER_REF_PATTERN = /^MC-[0-9A-Z]+$/;
+
+/**
  * Builds an order reference from an injected instant. It is deterministic for
  * tests and unique enough per order at millisecond granularity.
  */

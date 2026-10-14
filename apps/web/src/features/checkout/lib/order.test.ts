@@ -5,7 +5,7 @@ import type { Product } from "@/features/catalog/schemas/product";
 import type { CartLine } from "@/features/cart/lib/cart-lines";
 import { computeTotals } from "@/features/cart/lib/totals";
 
-import { buildLastOrder, createOrderRef } from "./order";
+import { ORDER_REF_PATTERN, buildLastOrder, createOrderRef } from "./order";
 
 /** A complete catalogue product whose id and price each test controls. */
 function makeProduct(overrides: Partial<Product> & { id: number }): Product {
@@ -52,6 +52,17 @@ describe("createOrderRef", () => {
 
   it("returns a non-empty reference", () => {
     expect(createOrderRef(new Date(2026, 0, 15))).toMatch(/\S/);
+  });
+});
+
+describe("ORDER_REF_PATTERN", () => {
+  it("matches a reference built by createOrderRef", () => {
+    expect(ORDER_REF_PATTERN.test(createOrderRef(new Date(2026, 0, 15, 10, 30, 0)))).toBe(true);
+  });
+
+  it("stays non-global and case-sensitive, as its consumer expects", () => {
+    expect(ORDER_REF_PATTERN.global).toBe(false);
+    expect(ORDER_REF_PATTERN.test("mc-1abc")).toBe(false);
   });
 });
 
