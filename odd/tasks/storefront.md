@@ -339,9 +339,11 @@ Phase 8 lands as three work units, each with its own commit:
 
 | Unit | Artifacts | Task | Status |
 | --- | --- | --- | --- |
-| 8a — checkout logic | `lib/constants.ts`, `features/cart/lib/totals.ts`, `features/checkout/lib/{masks,validation,order}.ts` (+ tests) | Shipping-method-aware totals, input masks, pure field rules and the order builder | pending |
-| 8b — checkout UI | `features/checkout/data/checkout-copy.ts`, `features/checkout/components/*` (+ test) | Address panel, shipping and payment radiogroups with their panels, error summary, success panel | pending |
-| 8c — route and chrome | `routes/checkout.tsx`, `routes/__root.tsx` (+ tests) | Assemble the route, show the checkout header instead of the site header, and the empty-cart redirect | pending |
+| 8a — checkout logic | `lib/constants.ts`, `features/cart/lib/totals.ts`, `features/checkout/lib/{masks,validation,order}.ts` (+ tests) | Shipping-method-aware totals, input masks, pure field rules and the order builder | done — `25e346a` |
+| 8b — checkout UI | `features/checkout/data/checkout-copy.ts`, `features/checkout/components/*` (+ test) | Address panel, shipping and payment radiogroups with their panels, error summary, success panel | done — `9369dfe` |
+| 8c — route and chrome | `routes/checkout.tsx`, `routes/__root.tsx` (+ tests) | Assemble the route, show the checkout header instead of the site header, and the empty-cart redirect | done — `97a7018` |
+| 8d — verifier consistency | `routes/checkout.tsx`, `features/checkout/components/checkout-form.tsx` (+ test) | The route owns the `h1`, and both routes agree on what an empty cart is | done — `68c0311` |
+| 8e — verifier findings | `features/checkout/components/*` (+ test) | The form is inert while the order is pending, and the summary entries meet the 44px target | done — `0d17cee` |
 
 Contract decisions taken while planning 8a (parent-owned, not left to the writer):
 
@@ -437,6 +439,12 @@ snapshot-only tests.
 | 7c — favourites UI | `1ddf45c` | 22 favourites tests; one exit path shared by remove, clear and the card heart, settled by `transitionend` or a bounded fallback |
 | 7d — verifier findings | `e7d1c7a`, `fb260b2` | 389 tests; save-for-later made the inverse of move-to-cart; the focus rescue no longer strands on the body |
 | 7 — phase verification | — | full web suite 39 files / 389 tests green; `bunx tsc --noEmit` clean run directly, not through turbo; `bun run --filter web build` green |
+| 8a — checkout logic | `25e346a` | 75 tests; method-aware shipping, masks, field rules returning codes, deterministic order builder; test-first RED recorded |
+| 8b — checkout form | `9369dfe` | 469 tests; copy module, single source for field ids, controlled form hook, presentational panels; `CheckoutForm` is the only writer; amount rows extracted to `TotalsRows` |
+| 8c — route and chrome | `97a7018` | 478 tests; the root drops the site header on `/checkout`, the route owns the steps header and the redirect; the route test mounts the real tree |
+| 8d — verifier consistency | `68c0311` | 479 tests; the route owns the `h1`, and both routes derive emptiness from the same joined items |
+| 8e — verifier findings | `0d17cee` | 482 tests; the form cannot move under a pending order, and the summary entries meet the 44px rule |
+| 8 — phase verification | — | full web suite 45 files / 482 tests green; `bunx tsc --noEmit` clean run directly; `bun run --filter web build` green |
 
 Phase 0 delivered assets under `apps/web/public/` (logo, 3 banners, 12 product images,
 `favicon.ico`), brand tokens in `apps/web/src/index.css`, `apps/web/DESIGN_SYSTEM.md`,
@@ -615,6 +623,32 @@ Deviations found while building phase 7:
   does not defeat that, and the verifier confirmed it in the installed sources. No test
   covers outside-click, modality or focus return; only the `alertdialog` role is asserted.
 
+Deviations found while building phase 8:
+
+- **The design sources are gone here too.** The checkout copy is authored, not transcribed.
+- **The step indicator lives in the route, not in the layout.** The current step is page
+  state, so the root only decides which chrome family a route belongs to: it drops the site
+  header on `/checkout` through one pathname constant, and the route renders
+  `CheckoutHeader` inside the container. That makes the checkout header a sticky header
+  bounded by the 1240px column instead of full-bleed like the site header. The design's own
+  layout is unknowable without the source; this is the coherent reading of the pieces that
+  already existed.
+- **The last order records no shipping or payment method.** The phase 7 `LastOrder` shape is
+  fixed and the cart's confirmation dialog reads it, so the seam was not widened. A real
+  order would carry both.
+- **`CHECKOUT_PROCESSING_MS = 600` stands in for the API that does not exist.** There is no
+  backend in scope, so the success is synthetic; the constant is exported so a test can drive
+  the window with fake timers.
+- **The lock is more than a disabled `fieldset`.** Base UI renders its radios as focusable
+  spans rather than native form controls, so a bare `fieldset disabled` left them live and
+  the divergence stayed reproducible. The delivered lock is `fieldset disabled` plus `inert`
+  plus a capture-phase click guard keyed on `submitting`, and the form is `aria-busy`. Only
+  `checkout-form.tsx` changed; no `disabled` prop was threaded through the panels.
+- **The amount rows moved.** `TotalsRows` was extracted from the cart's `OrderSummary`, so
+  the cart and the checkout render the same rows from the same totals object.
+- **`CheckoutField` got its own file.** It had been left inside `address-panel.tsx` and
+  imported from there by the payment details, which made the module boundary a lie.
+
 ## Open risks
 
 - **The design sources are gone from the machine.** Phases 0-6b were built against
@@ -643,6 +677,19 @@ Deviations found while building phase 7:
   commit split is by layer (logic, sections, route, favourites, two verifier fixes), not by
   review slice, so a reviewer still reads the phase as one change. If PR 4 is opened as one
   PR, cart and favourites should be considered for separate PRs instead.
+- **Phase 8 review size.** `1c269e7..HEAD` is 27 code files, 2,860 insertions and 45
+  deletions across five commits, second only to phase 7. The split is by layer, so PR 5 has
+  the same shape as PR 4.
+- **The server-painted checkout is untested.** The route test exercises the browser path, so
+  the claim that `/checkout` renders its structure on the server is verified by reading the
+  code, not by a test. The cart route is in the same position.
+- **Coverage gaps the verifier named for phase 8.** There is no test for the `replace`
+  history entry on the redirect, and none for a double `submit()`; the verifier established
+  by reading the code that a second call is safe only because the hook clears the previous
+  timer, which is a property no test pins.
+- **A persisted line with `quantity: 0` counts as non-empty.** Only reachable by editing
+  `mc-cart` by hand, and it would let checkout write a shipping-only order. Same store-level
+  re-clamp gap already recorded above; one `persist` `merge` closes both.
 - **The native review lifecycle is unusable in this environment.** The Pi review facade
   speaks `contract: gentle-ai.review-integration/v2` with `status/v9` envelopes, while the
   installed binary (`gentle-ai 4.0.0-20260928233426-d96a5d4f021b`, prerelease) publishes
