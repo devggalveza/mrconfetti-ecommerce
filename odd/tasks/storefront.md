@@ -300,6 +300,30 @@ behind an `alert-dialog` (the source cleared without confirming), empty state.
 
 **→ PR 4: cart + favorites.**
 
+Phase 7 lands as three work units, each with its own commit:
+
+| Unit | Artifacts | Task | Status |
+| --- | --- | --- | --- |
+| 7a — cart math and state | `features/cart/lib/totals.ts`, `stores/saved-store.ts`, `stores/promo-store.ts`, `stores/orders-store.ts`, `stores/store-provider.tsx`, `stores/selectors.ts` (+ tests) | Compose subtotal, discount, shipping and total in one tested module; add the three missing persisted domains | pending |
+| 7b — cart UI | `components/ui/alert-dialog.tsx`, `features/cart/components/*`, `routes/cart.tsx` (+ test) | Free-shipping meter, lines, saved-for-later, coupon, summary, empty state, rail, clear-all and confirmation dialogs | pending |
+| 7c — favorites UI | `features/favorites/components/*`, `routes/favoritos.tsx` (+ test) | Grid, reduced-motion remove, clear-all dialog, empty state | pending |
+
+Contract decisions taken while planning 7a (parent-owned, not left to the writer):
+
+- `computeTotals(lines, products, coupon)` is the single source of every cart amount. It
+  returns `items`, `units`, `subtotal`, `discount`, `shipping`, `total`,
+  `freeShippingApplied`, `freeShippingRemaining` and `freeShippingProgress`.
+- Shipping is free when the subtotal reaches `FREE_SHIPPING_FROM` **or** every line ships
+  free, and costs `STANDARD_SHIPPING_PRICE` otherwise; an empty cart ships for `0`.
+- `discount` is `roundMoney(applyCoupon(subtotal, coupon))`; `applyCoupon` returns the
+  discount, not the discounted subtotal. Per-line amounts stay pre-discount and the
+  discount is reported once in the summary, so no second distribution rule exists.
+- The cart line reuses `QuantityStepper`, whose ceiling is `quantityLimit(product)`, rather
+  than a private `MAX_QUANTITY` ceiling, so the cart can never exceed stock.
+- `orders-store` is created here rather than in phase 8: the cart owns the confirmation
+  dialog, so the seam it reads (`lastOrder` plus a `pendingConfirmation` flag) has to exist
+  before checkout can write to it.
+
 ### Phase 8 — Checkout `/checkout`
 
 Three-step indicator, address panel, shipping-method radiogroup (retotals on change),
@@ -520,6 +544,19 @@ Deviations found while building phase 6b:
 
 ## Open risks
 
+- **The design sources are gone from the machine.** Phases 0-6b were built against
+  `index.html`, `products.html`, `product-detail.html`, `cart.html`, `favoritos.html`,
+  `checkout.html`, `ayuda.html` and `store.js`, and this document cites them by line
+  (`cart.html:321`, `favoritos.html:199`). None of those files exist any more: they were
+  never committed, they are absent from the whole git history (no path in any commit
+  matches `*.html`), no stash holds them, and a bounded search of `Documents`, `Downloads`
+  and `Desktop` finds no `cart.html`, `checkout.html`, `products.html`, `product-detail.html`
+  or `store.js`. Phase 7 was therefore implemented from the per-page contract in this
+  document plus `apps/web/DESIGN_SYSTEM.md`, with the user's explicit approval, and **no
+  visual comparison against the source was possible**. The remaining pages are exposed the
+  same way: phase 8 (checkout) and phase 9 (help) lose their source too, and phase 10 step 7
+  ("visual comparison against each source HTML page at each breakpoint") cannot run at all
+  until the sources are re-supplied. Recorded, not worked around.
 - **The native review lifecycle is unusable in this environment.** The Pi review facade
   speaks `contract: gentle-ai.review-integration/v2` with `status/v9` envelopes, while the
   installed binary (`gentle-ai 4.0.0-20260928233426-d96a5d4f021b`, prerelease) publishes
