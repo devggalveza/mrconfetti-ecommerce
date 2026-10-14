@@ -1,4 +1,4 @@
-import type { TrackingStepId } from "../lib/tracking";
+import type { TrackingStepId, TrackingStepState } from "../lib/tracking";
 import type { HelpTopic } from "../schemas/help-search";
 
 /** One render block of a static help section. */
@@ -112,6 +112,11 @@ export const HELP_COPY = Object.freeze({
     found: (reference: string) => `Estos son los pasos de tu pedido ${reference}.`,
     /** Accessible name of the ordered step list. */
     stepsLabel: "Pasos del pedido",
+    /** Visible Spanish word for each tracked step state. */
+    stepState: { done: "Completado", current: "En curso", pending: "Pendiente" } satisfies Record<
+      TrackingStepState,
+      string
+    >,
     dateLabel: (date: string) => `Fecha del pedido: ${date}`,
     totalLabel: (amount: string) => `Total: ${amount}`,
     stepById: {

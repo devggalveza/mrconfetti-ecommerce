@@ -85,6 +85,14 @@ describe("HELP_COPY.tracking", () => {
     }
   });
 
+  it("labels the three step states in Spanish", () => {
+    expect([
+      HELP_COPY.tracking.stepState.done,
+      HELP_COPY.tracking.stepState.current,
+      HELP_COPY.tracking.stepState.pending,
+    ]).toEqual(["Completado", "En curso", "Pendiente"]);
+  });
+
   it("does not promise a lookup the app cannot do", () => {
     const text = HELP_COPY.tracking.notFound("MC-1ABC").toLowerCase();
     expect(text).toContain("mc-1abc");
