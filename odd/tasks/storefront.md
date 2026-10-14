@@ -335,6 +335,38 @@ when the cart is empty and there is no last order.
 
 **→ PR 5: checkout.**
 
+Phase 8 lands as three work units, each with its own commit:
+
+| Unit | Artifacts | Task | Status |
+| --- | --- | --- | --- |
+| 8a — checkout logic | `lib/constants.ts`, `features/cart/lib/totals.ts`, `features/checkout/lib/{masks,validation,order}.ts` (+ tests) | Shipping-method-aware totals, input masks, pure field rules and the order builder | pending |
+| 8b — checkout UI | `features/checkout/data/checkout-copy.ts`, `features/checkout/components/*` (+ test) | Address panel, shipping and payment radiogroups with their panels, error summary, success panel | pending |
+| 8c — route and chrome | `routes/checkout.tsx`, `routes/__root.tsx` (+ tests) | Assemble the route, show the checkout header instead of the site header, and the empty-cart redirect | pending |
+
+Contract decisions taken while planning 8a (parent-owned, not left to the writer):
+
+- `computeTotals` gains an optional fourth parameter, the shipping method, defaulting to
+  `standard`. Only the standard method can be waived by the free-shipping rule: express and
+  pickup are premium services the customer explicitly buys, so they cost their listed price
+  even when the cart qualifies. The default keeps every phase 7 assertion valid.
+- `ShippingMethod` and `SHIPPING_METHOD_PRICES` live in `lib/constants.ts`, next to the three
+  prices the plan already called `SHIPPING_RATES`. Labels are copy and stay in the checkout
+  copy module.
+- Validation returns **error codes, never Spanish copy**: the rules module stays pure and the
+  copy module owns the wording. `firstErrorField` walks a declared field order so the error
+  summary and the focus move are deterministic.
+- The last order keeps the phase 7 shape (`ref`, `total`, `items`, `email`, `date`). The
+  chosen shipping and payment methods are deliberately not persisted, so the seam the cart's
+  confirmation dialog reads does not move.
+- Order references are derived from an injected date, so the builder is deterministic under
+  test rather than reading the clock.
+- The form uses plain controlled state in a local hook, **not** `@tanstack/react-form`.
+  Planning assumed the library because the auth forms use it, but the checkout rules are
+  already a tested pure module: routing them through a form library would put the same rules
+  in a second place and force the tests to work around library render props. The hook owns the
+  state and calls the tested rules; the panels stay presentational. The auth forms keep their
+  library untouched.
+
 ### Phase 9 — Help `/ayuda`
 
 Table of contents with `aria-current` driven by the active topic, FAQ sections, order
