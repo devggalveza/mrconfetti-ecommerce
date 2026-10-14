@@ -46,6 +46,11 @@ export const CHECKOUT_COPY = Object.freeze({
   heading: "Finalizar compra",
   /** Supporting line under the heading. */
   formDescription: "Completa tus datos y elige cómo quieres recibir tu pedido.",
+  /** Breadcrumb trail labels. */
+  breadcrumbRoot: "Inicio",
+  breadcrumbCurrent: "Finalizar compra",
+  /** Accessible name of the loading status that stands in for the persisted sections. */
+  loading: "Cargando el pago",
 
   fieldsets: {
     contactAndAddress: "Contacto y envío",
