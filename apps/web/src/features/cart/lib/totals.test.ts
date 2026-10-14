@@ -3,7 +3,14 @@ import { describe, expect, it } from "vitest";
 import { PRODUCT_PACKS } from "@/features/catalog/data/product-options";
 import type { Product } from "@/features/catalog/schemas/product";
 import { COUPONS } from "@/lib/coupons";
-import { FREE_SHIPPING_FROM, STANDARD_SHIPPING_PRICE } from "@/lib/constants";
+import {
+  DEFAULT_SHIPPING_METHOD,
+  EXPRESS_SHIPPING_PRICE,
+  FREE_SHIPPING_FROM,
+  PICKUP_SHIPPING_PRICE,
+  SHIPPING_METHOD_PRICES,
+  STANDARD_SHIPPING_PRICE,
+} from "@/lib/constants";
 
 import type { CartLine } from "./cart-lines";
 import { cartItems, computeTotals } from "./totals";
@@ -157,5 +164,68 @@ describe("computeTotals", () => {
     expect(totals.items[0]?.lineSubtotal).toBe(30);
     expect(totals.items[0]).not.toHaveProperty("discount");
     expect(totals.items[0]).not.toHaveProperty("total");
+  });
+
+  it("prices each shipping method from the shared table", () => {
+    expect(SHIPPING_METHOD_PRICES.standard).toBe(STANDARD_SHIPPING_PRICE);
+    expect(SHIPPING_METHOD_PRICES.express).toBe(EXPRESS_SHIPPING_PRICE);
+    expect(SHIPPING_METHOD_PRICES.pickup).toBe(PICKUP_SHIPPING_PRICE);
+    expect(DEFAULT_SHIPPING_METHOD).toBe("standard");
+  });
+
+  it("ships an empty cart for zero with any method", () => {
+    const totals = computeTotals([], catalog, null, "express");
+    expect(totals.shipping).toBe(0);
+    expect(totals.freeShippingApplied).toBe(false);
+  });
+
+  it("treats an explicit standard method as the default", () => {
+    expect(computeTotals([line(1, 5)], [paid], null, "standard")).toEqual(
+      computeTotals([line(1, 5)], [paid], null),
+    );
+  });
+
+  it("charges the express price below the threshold and keeps the qualification numbers", () => {
+    const totals = computeTotals([line(1, 3)], [paid], null, "express");
+    expect(totals.subtotal).toBe(30);
+    expect(totals.shipping).toBe(EXPRESS_SHIPPING_PRICE);
+    expect(totals.freeShippingApplied).toBe(false);
+    expect(totals.freeShippingRemaining).toBe(20);
+    expect(totals.freeShippingProgress).toBe(0.6);
+    expect(totals.total).toBe(37.95);
+  });
+
+  it("still charges express above the threshold and reports no free shipping", () => {
+    const totals = computeTotals([line(1, 5)], [paid], null, "express");
+    expect(totals.subtotal).toBe(50);
+    expect(totals.shipping).toBe(EXPRESS_SHIPPING_PRICE);
+    expect(totals.freeShippingApplied).toBe(false);
+    expect(totals.freeShippingRemaining).toBe(0);
+    expect(totals.freeShippingProgress).toBe(1);
+    expect(totals.total).toBe(57.95);
+  });
+
+  it("charges the pickup price below the threshold", () => {
+    const totals = computeTotals([line(1, 3)], [paid], null, "pickup");
+    expect(totals.subtotal).toBe(30);
+    expect(totals.shipping).toBe(PICKUP_SHIPPING_PRICE);
+    expect(totals.freeShippingApplied).toBe(false);
+    expect(totals.freeShippingRemaining).toBe(20);
+    expect(totals.freeShippingProgress).toBe(0.6);
+    expect(totals.total).toBe(32.95);
+  });
+
+  it("still charges pickup above the threshold", () => {
+    const totals = computeTotals([line(1, 5)], [paid], null, "pickup");
+    expect(totals.subtotal).toBe(50);
+    expect(totals.shipping).toBe(PICKUP_SHIPPING_PRICE);
+    expect(totals.freeShippingApplied).toBe(false);
+    expect(totals.total).toBe(52.95);
+  });
+
+  it("still charges express for an all-free cart", () => {
+    const totals = computeTotals([line(3, 1)], [free], null, "express");
+    expect(totals.shipping).toBe(EXPRESS_SHIPPING_PRICE);
+    expect(totals.freeShippingApplied).toBe(false);
   });
 });

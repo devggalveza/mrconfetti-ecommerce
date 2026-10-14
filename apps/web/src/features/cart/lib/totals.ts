@@ -1,6 +1,11 @@
 import type { Product } from "@/features/catalog/schemas/product";
 import { applyCoupon, type Coupon } from "@/lib/coupons";
-import { FREE_SHIPPING_FROM, STANDARD_SHIPPING_PRICE } from "@/lib/constants";
+import {
+  DEFAULT_SHIPPING_METHOD,
+  FREE_SHIPPING_FROM,
+  SHIPPING_METHOD_PRICES,
+  type ShippingMethod,
+} from "@/lib/constants";
 import { roundMoney } from "@/lib/format";
 
 import { countUnits, type CartLine } from "./cart-lines";
@@ -62,6 +67,7 @@ export function computeTotals(
   lines: readonly CartLine[],
   products: readonly Product[],
   coupon: Coupon | null,
+  method: ShippingMethod = DEFAULT_SHIPPING_METHOD,
 ): CartTotals {
   const knownIds = new Set(products.map((product) => product.id));
   const knownLines = lines.filter((line) => knownIds.has(line.id));
@@ -74,14 +80,20 @@ export function computeTotals(
   const isEmpty = items.length === 0;
   const everyItemShipsFree = items.length > 0 && items.every((item) => item.product.freeShipping);
   const reachedThreshold = subtotal >= FREE_SHIPPING_FROM;
+  // Qualification is a property of the cart, independent of the selected method.
+  const qualifiesForFreeShipping = reachedThreshold || everyItemShipsFree;
+  // Only the standard method is waived by qualification; express and pickup are
+  // premium services the customer explicitly buys.
   const shipping =
-    isEmpty || reachedThreshold || everyItemShipsFree ? 0 : roundMoney(STANDARD_SHIPPING_PRICE);
+    isEmpty || (qualifiesForFreeShipping && method === "standard")
+      ? 0
+      : roundMoney(SHIPPING_METHOD_PRICES[method]);
 
-  const freeShippingApplied = !isEmpty && shipping === 0;
-  const freeShippingRemaining = freeShippingApplied
+  const freeShippingApplied = !isEmpty && shipping === 0 && method === "standard";
+  const freeShippingRemaining = qualifiesForFreeShipping
     ? 0
     : Math.max(0, roundMoney(FREE_SHIPPING_FROM - subtotal));
-  const freeShippingProgress = freeShippingApplied
+  const freeShippingProgress = qualifiesForFreeShipping
     ? 1
     : Math.min(1, subtotal / FREE_SHIPPING_FROM);
 
