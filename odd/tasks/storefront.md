@@ -304,9 +304,9 @@ Phase 7 lands as three work units, each with its own commit:
 
 | Unit | Artifacts | Task | Status |
 | --- | --- | --- | --- |
-| 7a — cart math and state | `features/cart/lib/totals.ts`, `stores/saved-store.ts`, `stores/promo-store.ts`, `stores/orders-store.ts`, `stores/store-provider.tsx`, `stores/selectors.ts` (+ tests) | Compose subtotal, discount, shipping and total in one tested module; add the three missing persisted domains | pending |
-| 7b — cart UI | `components/ui/alert-dialog.tsx`, `features/cart/components/*`, `routes/cart.tsx` (+ test) | Free-shipping meter, lines, saved-for-later, coupon, summary, empty state, rail, clear-all and confirmation dialogs | pending |
-| 7c — favorites UI | `features/favorites/components/*`, `routes/favoritos.tsx` (+ test) | Grid, reduced-motion remove, clear-all dialog, empty state | pending |
+| 7a — cart math and state | `features/cart/lib/totals.ts`, `stores/saved-store.ts`, `stores/promo-store.ts`, `stores/orders-store.ts`, `stores/store-provider.tsx`, `stores/selectors.ts` (+ tests) | Compose subtotal, discount, shipping and total in one tested module; add the three missing persisted domains | done — `ce7fec6` |
+| 7b — cart UI | `components/ui/alert-dialog.tsx`, `features/cart/components/*`, `routes/cart.tsx` (+ test) | Free-shipping meter, lines, saved-for-later, coupon, summary, empty state, rail, clear-all and confirmation dialogs | done — `15948f6`, `64b36cd` |
+| 7c — favorites UI | `features/favorites/components/*`, `routes/favoritos.tsx` (+ test) | Grid, reduced-motion remove, clear-all dialog, empty state | done — `1ddf45c` |
 
 Contract decisions taken while planning 7a (parent-owned, not left to the writer):
 
@@ -400,6 +400,11 @@ snapshot-only tests.
 | 6a — product detail data | `076c753` | 259 tests; every legacy field verified byte-identical to `HEAD` across the 36 products |
 | 6b-i — product detail content | `8cfb571` | 272 tests; `description`/`highlights` added and authored for all 36; the page's copy becomes a typed module |
 | 6b-ii — product detail UI | `631473c` | 309 tests; the route was unreachable and now renders from the real tree; `check-types` and `build` clean |
+| 7a — cart math and state | `ce7fec6` | 43 tests; `computeTotals` plus the `mc-saved`, `mc-promo` and `mc-last-order` stores; test-first RED recorded, `check-types` clean |
+| 7b — cart UI | `15948f6`, `64b36cd` | 59 cart tests; base-ui alert dialog vendored; the route renders its structure on the server and only the persisted sections wait for hydration |
+| 7c — favourites UI | `1ddf45c` | 22 favourites tests; one exit path shared by remove, clear and the card heart, settled by `transitionend` or a bounded fallback |
+| 7d — verifier findings | `e7d1c7a`, `fb260b2` | 389 tests; save-for-later made the inverse of move-to-cart; the focus rescue no longer strands on the body |
+| 7 — phase verification | — | full web suite 39 files / 389 tests green; `bunx tsc --noEmit` clean run directly, not through turbo; `bun run --filter web build` green |
 
 Phase 0 delivered assets under `apps/web/public/` (logo, 3 banners, 12 product images,
 `favicon.ico`), brand tokens in `apps/web/src/index.css`, `apps/web/DESIGN_SYSTEM.md`,
@@ -542,6 +547,42 @@ Deviations found while building phase 6b:
   the content half is read-and-skim, the component half is what needs reading, and the
   route test alone is 567 lines.
 
+Deviations found while building phase 7:
+
+- **The design sources are gone.** Recorded under Open risks; phase 7 was built from the
+  per-page contract in this document plus `DESIGN_SYSTEM.md`, and every phase 7 string is
+  authored rather than templated from a source file.
+- **The hydration gate is a new convention, not a documented one.** No route used
+  `useStoresHydrated()` before this phase; the state design only said the flag exists so no
+  component reads persisted state during SSR. The policy this phase settled on, and the one
+  `/favoritos` and `/checkout` copy: breadcrumbs, the `h1` and static sections render
+  unconditionally on the server, and every persisted section sits behind the flag replaced
+  by one skeleton `role="status"`. The first draft returned `null` for the whole route,
+  which blanked the server HTML of a real URL; the verifier confirmed the corrected gate
+  leaks no persisted value in either route.
+- **`orders-store` landed in phase 7, not phase 8.** The cart owns the confirmation dialog,
+  so the seam it reads (`lastOrder` plus `pendingConfirmation`) had to exist first. The
+  dialog is inert until checkout writes an order; that is expected, not a bug.
+- **The recommended rail is the top five by discount.** The source's rail contents are
+  unknown with the sources gone, so it uses `dealsByDiscount(products).slice(0, 5)`.
+- **The cart line reuses `QuantityStepper`, so its ceiling is stock, not `MAX_QUANTITY`.**
+  The plan said a `MAX_QTY` ceiling. A line persisted above a product's current stock
+  therefore renders above its ceiling: the increase control is disabled and the decrease
+  control walks it back into range. This is the pre-existing stock-blind add on the product
+  card made visible, not a new defect.
+- **Save-for-later is a move, not a copy.** The plan did not say which; a copy made the pair
+  additive, so saving then moving back doubled a unit and the cart could never be
+  decluttered. `saveForLater` is now the exact inverse of `moveToCart`, and `unsave` leaves
+  the cart alone. The legacy `mc-saved` shape is `ids: number[]`, so a save/move round trip
+  returns exactly one unit and the line quantity is deliberately not preserved.
+- **The free-shipping meter is hand-rolled** with `role="progressbar"` and its own text,
+  rather than vendoring base-ui's `progress`, following the pagination precedent: the
+  primitive's extra surface was not needed.
+- **The alert dialog's modality is asserted by nobody.** `@base-ui/react/alert-dialog`
+  forces `modal` and `disablePointerDismissal` and returns focus to the trigger; the wrapper
+  does not defeat that, and the verifier confirmed it in the installed sources. No test
+  covers outside-click, modality or focus return; only the `alertdialog` role is asserted.
+
 ## Open risks
 
 - **The design sources are gone from the machine.** Phases 0-6b were built against
@@ -557,6 +598,19 @@ Deviations found while building phase 6b:
   same way: phase 8 (checkout) and phase 9 (help) lose their source too, and phase 10 step 7
   ("visual comparison against each source HTML page at each breakpoint") cannot run at all
   until the sources are re-supplied. Recorded, not worked around.
+- **Rehydrated cart lines are never re-clamped.** `cart-store.ts` clamps on every write but
+  has no `persist` `merge`, so a hand-edited `mc-cart` can carry a negative quantity or an
+  unknown id straight into `computeTotals` and produce a negative total. Unreachable through
+  the app's own controls, which is why it is recorded rather than patched inside a UI phase.
+  A `merge` that runs `clampQuantity` and `pruneUnknownIds` is the smallest fix. Phase 10.
+- **Two coupon fields now behave differently.** The cart's writes to `mc-promo` and applies
+  the discount; the product detail page's still validates and reports without touching
+  money. Unifying them is a change to a phase 5 component and belongs to a later phase.
+- **Phase 7 review size.** `27f126c..HEAD` is 31 code files, 2,976 insertions and 12
+  deletions across six commits — the largest slice in the feature, bigger than PR 3. The
+  commit split is by layer (logic, sections, route, favourites, two verifier fixes), not by
+  review slice, so a reviewer still reads the phase as one change. If PR 4 is opened as one
+  PR, cart and favourites should be considered for separate PRs instead.
 - **The native review lifecycle is unusable in this environment.** The Pi review facade
   speaks `contract: gentle-ai.review-integration/v2` with `status/v9` envelopes, while the
   installed binary (`gentle-ai 4.0.0-20260928233426-d96a5d4f021b`, prerelease) publishes
