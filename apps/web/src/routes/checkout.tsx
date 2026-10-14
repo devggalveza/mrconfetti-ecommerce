@@ -1,8 +1,12 @@
+import { useMemo } from "react";
+
 import { Navigate, createFileRoute } from "@tanstack/react-router";
 
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { CheckoutHeader } from "@/components/layout/checkout-header";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cartItems } from "@/features/cart/lib/totals";
+import { products } from "@/features/catalog/data/products";
 import { CheckoutForm } from "@/features/checkout/components/checkout-form";
 import { CheckoutSuccess } from "@/features/checkout/components/checkout-success";
 import { CHECKOUT_COPY } from "@/features/checkout/data/checkout-copy";
@@ -30,15 +34,20 @@ export const Route = createFileRoute("/checkout")({
  * sections until the store provider rehydrates. Only then is the state matrix
  * evaluated: a completed order with an empty cart shows the success panel, an
  * empty cart with no order redirects to `/cart`, and anything else shows the
- * form. `CheckoutForm` renders the page `h1` itself, so the route supplies it in
- * every other state and the page always has exactly one `h1`.
+ * form.
+ *
+ * The `h1` renders unconditionally, exactly as `/cart` and `/favoritos` do, so
+ * every state — server paint, loading, redirect, success and form — shows
+ * precisely one page heading. Emptiness is read from the same joined items
+ * `/cart` uses, so a persisted cart holding only unknown product ids is empty on
+ * both routes and can never render a checkout form over an empty item list.
  */
 function CheckoutComponent() {
   const hydrated = useStoresHydrated();
   const lines = useCartStore(selectCartLines);
   const lastOrder = useOrdersStore(selectLastOrder);
-  const isEmpty = lines.length === 0;
-  const showForm = hydrated && !isEmpty;
+  const items = useMemo(() => cartItems(lines, products), [lines]);
+  const isEmpty = items.length === 0;
   const currentStep = hydrated && isEmpty && lastOrder !== null ? 3 : 2;
 
   return (
@@ -52,7 +61,7 @@ function CheckoutComponent() {
 
       <CheckoutHeader currentStep={currentStep} />
 
-      {showForm ? null : <h1 className="text-2xl font-bold">{CHECKOUT_COPY.heading}</h1>}
+      <h1 className="text-2xl font-bold">{CHECKOUT_COPY.heading}</h1>
 
       {hydrated ? (
         isEmpty ? (

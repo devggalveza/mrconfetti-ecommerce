@@ -58,6 +58,12 @@ if (shortProduct === undefined) {
 /** The instant the seeded order reference is built from, so it is deterministic. */
 const NOW = new Date(2026, 0, 15, 10, 0, 0);
 
+/**
+ * A product id no catalogue entry uses, as stale persisted state can hold after
+ * the catalogue drops a product.
+ */
+const UNKNOWN_PRODUCT_ID = Math.max(...products.map((product) => product.id)) + 1;
+
 /** A completed order, as checkout writes it, with the reference and total it shows. */
 const LAST_ORDER = {
   ref: createOrderRef(NOW),
@@ -169,6 +175,31 @@ describe("/checkout route in the real generated tree", () => {
     expect(router.state.matches.some((match) => match.routeId === "/cart")).toBe(true);
   });
 
+  it("redirects a stale cart whose only line is an unknown product id to /cart", async () => {
+    // The persisted cart holds a product the catalogue no longer knows, so the
+    // joined items are empty. The checkout must agree with /cart and redirect
+    // rather than rendering a form over an empty item list.
+    useCartStore.setState({ lines: [{ id: UNKNOWN_PRODUCT_ID, quantity: 1 }] });
+
+    const router = await renderCheckout("/checkout");
+
+    await vi.waitFor(
+      () => {
+        expect(router.state.location.pathname).toBe("/cart");
+      },
+      { timeout: 5000 },
+    );
+    expect(
+      await screen.findByRole(
+        "heading",
+        { level: 1, name: CART_COPY.heading },
+        { timeout: 5000 },
+      ),
+    ).toBeTruthy();
+    expect(router.state.matches.some((match) => match.routeId === "/cart")).toBe(true);
+    expect(screen.queryByLabelText(CHECKOUT_COPY.fields.email.label)).toBeNull();
+  });
+
   it("renders the form with its fields, methods and amount rows for a seeded cart", async () => {
     useCartStore.setState({ lines: [{ id: shortProduct.id, quantity: 1 }] });
 
@@ -178,6 +209,12 @@ describe("/checkout route in the real generated tree", () => {
     for (const name of ["firstName", "lastName", "phone", "address", "city", "postalCode"] as const) {
       expect(screen.getByLabelText(CHECKOUT_COPY.fields[name].label)).toBeTruthy();
     }
+
+    // The route owns the page heading in this state too: exactly one `h1`, and it
+    // sits outside the form rather than being rendered by `CheckoutForm`.
+    const heading = screen.getByRole("heading", { level: 1, name: CHECKOUT_COPY.heading });
+    expect(heading.closest("form")).toBeNull();
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
 
     // Three shipping methods and three payment methods.
     expect(screen.getByRole("radio", { name: /Envío estándar/ })).toBeTruthy();
@@ -231,6 +268,10 @@ describe("/checkout route in the real generated tree", () => {
     expect(screen.getByText(CHECKOUT_COPY.success.reference(LAST_ORDER.ref))).toBeTruthy();
     expect(screen.getByText(formatMoney(LAST_ORDER.total))).toBeTruthy();
     expect(screen.queryByLabelText(CHECKOUT_COPY.fields.email.label)).toBeNull();
+
+    // The page heading still comes from the route, and it is the only `h1`.
+    expect(screen.getByRole("heading", { level: 1, name: CHECKOUT_COPY.heading })).toBeTruthy();
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
 
     const steps = screen.getByRole("list", { name: "Pasos de la compra" });
     expect(steps.querySelector('[aria-current="step"]')?.textContent).toContain("Confirmación");

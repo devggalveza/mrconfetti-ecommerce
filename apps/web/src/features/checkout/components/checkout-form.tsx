@@ -105,10 +105,7 @@ export function CheckoutForm({ now = () => new Date() }: CheckoutFormProps) {
     <form onSubmit={handleFormSubmit} noValidate>
       <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="flex flex-col gap-6">
-          <div>
-            <h1 className="text-2xl font-bold">{CHECKOUT_COPY.heading}</h1>
-            <p className="text-muted-foreground mt-1 text-sm">{CHECKOUT_COPY.formDescription}</p>
-          </div>
+          <p className="text-muted-foreground mt-1 text-sm">{CHECKOUT_COPY.formDescription}</p>
 
           <CheckoutErrorSummary errors={form.errorList} containerRef={summaryRef} />
 
