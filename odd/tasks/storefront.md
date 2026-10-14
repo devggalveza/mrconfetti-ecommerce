@@ -375,7 +375,91 @@ Table of contents with `aria-current` driven by the active topic, FAQ sections, 
 tracking form with a four-step tracking list and validation, returns, contact, about,
 privacy and terms sections. Topic is a typed search param so deep links work.
 
+The page is one document with seven anchored sections (`ayuda`, `pedido`, `devoluciones`,
+`contacto`, `nosotros`, `privacidad`, `terminos`) and a sticky table of contents on desktop
+that collapses into a horizontal chip rail below 768px.
+
 **→ PR 6: help.**
+
+Phase 9 lands as two work units, each with its own commit:
+
+| Unit | Artifacts | Task | Status |
+| --- | --- | --- | --- |
+| 9a — help contract and logic | `features/help/schemas/help-search.ts`, `features/help/data/help-copy.ts`, `features/help/lib/tracking.ts`, `features/checkout/lib/order.ts` (+ tests) | The seven topics and their zod schema, the frozen Spanish copy, and the pure tracking rules | pending |
+| 9b — help sections and route | `features/help/components/*`, `features/help/hooks/*`, `routes/ayuda.tsx` (+ test) | Table of contents with `aria-current`, FAQ, tracking panel, returns, contact, about, privacy and terms, and the route that assembles them | pending |
+
+Contract decisions taken while planning 9a (parent-owned, not left to the writer):
+
+- `tema` accepts exactly `ayuda | pedido | devoluciones | contacto | nosotros | privacidad |
+  terminos`, and it is optional. A value outside the set is **stripped, not rejected**: an
+  unknown `tema` renders the page with no entry marked `aria-current` and no scroll, which is
+  the same state the footer's bare “Centro de ayuda” link produces. Rejecting it would turn a
+  stale bookmark into an error page.
+- The schema and the topic tuple live in `features/help/schemas/help-search.ts`, mirroring
+  `features/catalog/schemas/products-search.ts`, and the route parses with `.catch({})` the way
+  `/products` does. The query codec is already wired in `router.tsx`, so links read
+  `?tema=pedido`; the footer's links and the `chrome.test.tsx` assertions on their hrefs must
+  not change, and the new type must accept the six values the footer already passes.
+- The order-reference format is exported **once**, from `features/checkout/lib/order.ts` as
+  `ORDER_REF_PATTERN`, and the help tracking module imports it. No second regex, and the
+  checkout builder keeps the single source of the format.
+- Tracking is honest. The only order that can be found is the one in `mc-last-order`: a
+  well-formed reference that does not match it gets an explicit “no encontramos ese pedido”
+  plus the contact channels, and a malformed one is a field error. No step, date or total is
+  invented for a reference the app cannot resolve.
+- The four-step list is both content and state. The step table is frozen in the copy module;
+  the tracking result marks each step from the order date against an **injected** `now`, with
+  thresholds documented as a stand-in for the fulfilment API this frontend does not have. The
+  module never reads the clock, so it stays deterministic under test.
+- Only the tracking section reads persisted state, so only it sits behind
+  `useStoresHydrated()` with a single `role="status"` skeleton. The table of contents, the
+  `h1` and every static section render on the server. Same convention as `/cart`,
+  `/favoritos` and `/checkout`.
+- FAQs are native `<details>` / `<summary>`. No accordion primitive is vendored and the plan
+  forbids adding dependencies; the native element brings the keyboard behaviour for free.
+  `<summary>` meets the 44px rule like every other control, and the phase 8 finding about
+  target sizes is the precedent.
+- The active entry is marked with `aria-current`, and the scroll into view respects
+  `prefers-reduced-motion` through the existing `hooks/use-prefers-reduced-motion.ts`.
+- All Spanish copy is authored in one frozen `HELP_COPY` object. The design source for this
+  page is gone like the three before it, so the copy is a reading of the plan's section list,
+  not a transcription.
+
+Coding contracts pinned while briefing 9a and 9b (parent-owned, not left to the writer):
+
+- `ORDER_REF_PATTERN = /^MC-[0-9A-Z]+$/` is exported non-global and case-sensitive;
+  `createOrderRef` keeps its implementation and a new test asserts a built reference matches the
+  exported pattern, so the format and its consumer cannot drift apart.
+- `HELP_TOPICS` is the single ordered source of the seven anchors. `helpSearchSchema` is
+  `z.object({ tema: z.enum(HELP_TOPICS).optional().catch(undefined) })` typed `z.ZodType<HelpSearch>`,
+  and the route parses `helpSearchSchema.catch({}).parse(search)` exactly like `/products`.
+- The tracking rules return **codes, not copy**, following the phase 8 validation decision.
+  `TRACKING_STEPS` is the single ordered source of progression; the copy module owns
+  `stepById: Record<TrackingStepId, { label, description }>` through `satisfies`, and the panel
+  zips the two. `markTrackingSteps(orderDate, now)` returns `Record<TrackingStepId, TrackingStepState>`
+  from an injected `now`, with thresholds in hours (`preparing: 4`, `shipped: 24`, `delivered: 72`),
+  `confirmed` always `done`, the first pending step promoted to `current`, and an unparsable date
+  counted as elapsed zero. The module never reads the clock.
+- `resolveTracking(input, lastOrder, now)` returns a discriminated union over
+  `empty | malformed | not-found | found`. Normalising the typed reference (trim plus uppercase) is
+  the help module's job; `not-found` carries the normalised reference and invents no step, date or
+  total.
+- The static sections share one block model, `{ kind: "paragraph", text } | { kind: "list", items }`,
+  so one presentational section component renders five anchored sections instead of five bespoke ones.
+- Honesty in the authored copy: the contact section publishes only `hola@mrconfetti.example`
+  (RFC 2606 reserves `.example`) and no phone number, because the demo store has no real channel;
+  privacy and terms say in their own text that they are demo content with no legal value, matching
+  the footer's demo note.
+- The active table-of-contents entry uses `aria-current="location"`, not `"page"` like
+  `category-nav`: this is a section of the current page, not another page.
+- Entries are plain `<a href="#<id>">` anchors. A click only sets the active state; the browser does
+  the move, so keyboard, no-JS and stale-bookmark deep links all work. Reduced motion applies only to
+  the initial `tema` scroll, which runs in a `useEffect` through `usePrefersReducedMotion()`
+  (`behavior: "auto"` when reduced). Sections carry `scroll-mt-*` so an anchor lands below the sticky
+  site header.
+- The layout breakpoint is 768px: a sticky aside from `md` up, the chip rail below it. The route keeps
+  the site header and adds no breadcrumb (the plan lists no breadcrumb here), and the `h1` uses the
+  same `text-2xl font-bold` as `/cart`.
 
 ### Phase 10 — Cross-cutting verification and close
 
