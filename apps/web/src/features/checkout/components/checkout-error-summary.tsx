@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import type { MouseEvent, RefObject } from "react";
 
 import { CHECKOUT_COPY, checkoutErrorMessage } from "../data/checkout-copy";
 import { checkoutFieldId } from "../lib/field-ids";
@@ -36,7 +36,11 @@ export function CheckoutErrorSummary({ errors, containerRef }: CheckoutErrorSumm
           <li key={field}>
             <a
               href={`#${checkoutFieldId(field)}`}
-              className="text-destructive underline underline-offset-4"
+              onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+                event.preventDefault();
+                document.getElementById(checkoutFieldId(field))?.focus();
+              }}
+              className="text-destructive focus-visible:outline-ring inline-flex min-h-11 items-center underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               {CHECKOUT_COPY.fields[field].label}: {checkoutErrorMessage(code)}
             </a>

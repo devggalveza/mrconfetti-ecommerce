@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, MouseEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { TotalsRows } from "@/features/cart/components/totals-rows";
@@ -97,14 +97,34 @@ export function CheckoutForm({ now = () => new Date() }: CheckoutFormProps) {
     }
   };
 
+  // The disabled fieldset covers every native control. The radiogroups' visible
+  // elements are focusable spans, which a fieldset does not disable natively, so
+  // this capture guard keeps them from changing the totals while the pending
+  // order is already being built. `inert` adds the browser-level focus trap.
+  const handleFieldsClickCapture = (event: MouseEvent<HTMLFieldSetElement>): void => {
+    if (form.submitting) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
   if (successOrder !== null) {
     return <CheckoutSuccess order={successOrder} headingRef={successHeadingRef} />;
   }
 
   return (
-    <form onSubmit={handleFormSubmit} noValidate>
+    <form onSubmit={handleFormSubmit} noValidate aria-busy={form.submitting ? true : undefined}>
       <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
-        <div className="flex flex-col gap-6">
+        {/* Native `disabled` disables every nested form control; `inert`
+            extends that to the whole subtree. Together they keep the visible
+            totals frozen while the pending order is built from the totals
+            captured at submit time. */}
+        <fieldset
+          disabled={form.submitting}
+          inert={form.submitting ? true : undefined}
+          onClickCapture={handleFieldsClickCapture}
+          className="m-0 flex min-w-0 flex-col gap-6 border-0 p-0"
+        >
           <p className="text-muted-foreground mt-1 text-sm">{CHECKOUT_COPY.formDescription}</p>
 
           <CheckoutErrorSummary errors={form.errorList} containerRef={summaryRef} />
@@ -130,7 +150,7 @@ export function CheckoutForm({ now = () => new Date() }: CheckoutFormProps) {
             onFieldChange={form.setField}
             onFieldBlur={form.blurField}
           />
-        </div>
+        </fieldset>
 
         <aside className="flex flex-col gap-4">
           <section aria-labelledby={summaryHeadingId} className="border-border rounded-xl border p-4">

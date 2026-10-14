@@ -8,7 +8,7 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -19,6 +19,7 @@ import { AddressPanel } from "@/features/checkout/components/address-panel";
 import { CheckoutForm } from "@/features/checkout/components/checkout-form";
 import { ShippingMethodPanel } from "@/features/checkout/components/shipping-method-panel";
 import { CHECKOUT_COPY } from "@/features/checkout/data/checkout-copy";
+import { CHECKOUT_PROCESSING_MS } from "@/features/checkout/hooks/use-checkout-form";
 import { checkoutErrorId } from "@/features/checkout/lib/field-ids";
 import { createOrderRef } from "@/features/checkout/lib/order";
 import {
@@ -60,6 +61,30 @@ function emptyValues(): CheckoutValues {
 /** Finds a radio by a substring of its accessible name, which carries its label. */
 function radio(label: string): HTMLElement {
   return screen.getByRole("radio", { name: new RegExp(label) });
+}
+
+/** The valid values the submit-success tests fill into every required field. */
+const VALID_FILL: readonly [CheckoutFieldName, string][] = [
+  ["email", "ana@example.com"],
+  ["firstName", "Ana"],
+  ["lastName", "López"],
+  ["phone", "12345678"],
+  ["address", "Calle Uno 1-23"],
+  ["city", "Guatemala"],
+  ["postalCode", "01001"],
+  ["cardNumber", "4111111111111111"],
+  ["cardName", "Ana López"],
+  ["cardExpiry", "12/30"],
+  ["cardCvc", "123"],
+];
+
+/** Fills every required field with the shared valid values through the DOM. */
+function fillValidForm(): void {
+  for (const [name, value] of VALID_FILL) {
+    fireEvent.change(screen.getByLabelText(CHECKOUT_COPY.fields[name].label), {
+      target: { value },
+    });
+  }
 }
 
 /**
@@ -261,24 +286,7 @@ describe("CheckoutForm", () => {
 
     // The router mounts asynchronously, so wait for its first field before filling.
     await screen.findByLabelText(CHECKOUT_COPY.fields.email.label);
-    const fill: [CheckoutFieldName, string][] = [
-      ["email", "ana@example.com"],
-      ["firstName", "Ana"],
-      ["lastName", "López"],
-      ["phone", "12345678"],
-      ["address", "Calle Uno 1-23"],
-      ["city", "Guatemala"],
-      ["postalCode", "01001"],
-      ["cardNumber", "4111111111111111"],
-      ["cardName", "Ana López"],
-      ["cardExpiry", "12/30"],
-      ["cardCvc", "123"],
-    ];
-    for (const [name, value] of fill) {
-      fireEvent.change(screen.getByLabelText(CHECKOUT_COPY.fields[name].label), {
-        target: { value },
-      });
-    }
+    fillValidForm();
 
     vi.useFakeTimers();
     fireEvent.click(screen.getByRole("button", { name: CHECKOUT_COPY.submit }));
@@ -292,5 +300,80 @@ describe("CheckoutForm", () => {
     expect(useOrdersStore.getState().pendingConfirmation).toBe(true);
     expect(useCartStore.getState().lines).toEqual([]);
     expect(localStorage.getItem("mc-last-order")).toContain(createOrderRef(NOW));
+  });
+
+  it("locks the submit button in its processing state for the full window", async () => {
+    useCartStore.setState({ lines: [{ id: shortProduct.id, quantity: 1 }] });
+    renderInRouter(<CheckoutForm now={() => NOW} />);
+    await screen.findByLabelText(CHECKOUT_COPY.fields.email.label);
+    fillValidForm();
+
+    vi.useFakeTimers();
+    fireEvent.click(screen.getByRole("button", { name: CHECKOUT_COPY.submit }));
+
+    const processing = screen.getByRole("button", { name: CHECKOUT_COPY.processing });
+    expect((processing as HTMLButtonElement).disabled).toBe(true);
+
+    act(() => {
+      vi.advanceTimersByTime(CHECKOUT_PROCESSING_MS - 1);
+    });
+    expect(
+      (screen.getByRole("button", { name: CHECKOUT_COPY.processing }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    vi.useRealTimers();
+
+    expect(screen.queryByRole("button", { name: CHECKOUT_COPY.processing })).toBeNull();
+    expect(screen.getByRole("heading", { name: CHECKOUT_COPY.success.heading })).toBeTruthy();
+  });
+
+  it("keeps the pending order and the visible summary on the pre-click total", async () => {
+    const lines = [{ id: shortProduct.id, quantity: 1 }];
+    useCartStore.setState({ lines });
+    renderInRouter(<CheckoutForm now={() => NOW} />);
+    await screen.findByLabelText(CHECKOUT_COPY.fields.email.label);
+    fillValidForm();
+
+    const standard = computeTotals(lines, products, null, "standard");
+    const express = computeTotals(lines, products, null, "express");
+    expect(standard.total).not.toBe(express.total);
+    expect(screen.getByText(formatMoney(standard.total))).toBeTruthy();
+
+    vi.useFakeTimers();
+    fireEvent.click(screen.getByRole("button", { name: CHECKOUT_COPY.submit }));
+
+    // The customer tries to retotal the summary after the order was captured.
+    fireEvent.click(radio(CHECKOUT_COPY.shipping.express.label));
+
+    expect(screen.getByText(formatMoney(standard.total))).toBeTruthy();
+    expect(screen.queryByText(formatMoney(express.total))).toBeNull();
+
+    act(() => {
+      vi.advanceTimersByTime(CHECKOUT_PROCESSING_MS);
+    });
+    vi.useRealTimers();
+
+    expect(useOrdersStore.getState().lastOrder?.total).toBe(standard.total);
+  });
+
+  it("moves focus to the field when its error summary entry is activated", async () => {
+    const user = userEvent.setup({ delay: null });
+    render(<CheckoutForm now={() => NOW} />);
+
+    await user.click(screen.getByRole("button", { name: CHECKOUT_COPY.submit }));
+    const summary = await screen.findByRole("alert");
+
+    const entry = within(summary).getByRole("link", {
+      name: new RegExp(CHECKOUT_COPY.fields.email.label),
+    });
+    await user.click(entry);
+
+    expect(document.activeElement).toBe(
+      screen.getByLabelText(CHECKOUT_COPY.fields.email.label),
+    );
   });
 });
