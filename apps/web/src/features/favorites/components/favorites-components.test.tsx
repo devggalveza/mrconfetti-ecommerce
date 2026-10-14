@@ -218,6 +218,29 @@ describe("FavoritesGrid", () => {
     expect(document.activeElement).toBe(list);
     expect(document.activeElement).not.toBe(document.body);
   });
+
+  it("moves focus into the empty state when the last favourite is removed under reduced motion", async () => {
+    stubMatchMedia(true);
+    useFavoritesStore.setState({ ids: [first.id] });
+    renderInRouter(<FavoritesGrid />);
+
+    const list = await screen.findByRole("list", { name: FAVORITES_COPY.gridLabel });
+    const heart = within(list).getByRole("button", { name: heartLabel(first.name) });
+    heart.focus();
+    expect(document.activeElement).toBe(heart);
+
+    fireEvent.click(heart);
+
+    // The grid gives way to the empty state, so the rescue must land there —
+    // never on the document body.
+    expect(useFavoritesStore.getState().ids).toEqual([]);
+    expect(document.activeElement).not.toBe(document.body);
+
+    const heading = await screen.findByText(FAVORITES_COPY.empty.heading);
+    const active = document.activeElement as HTMLElement | null;
+    expect(active).not.toBeNull();
+    expect(active?.contains(heading)).toBe(true);
+  });
 });
 
 describe("ClearFavoritesDialog", () => {

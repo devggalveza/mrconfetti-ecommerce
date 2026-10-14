@@ -47,6 +47,7 @@ export function FavoritesGrid() {
   const ids = useFavoritesStore(selectFavoriteIds);
   const prefersReducedMotion = usePrefersReducedMotion();
   const gridRef = useRef<HTMLUListElement>(null);
+  const emptyRef = useRef<HTMLDivElement>(null);
 
   const [knownIds, setKnownIds] = useState<readonly number[]>(ids);
   const [exitingIds, setExitingIds] = useState<ReadonlySet<number>>(() => new Set());
@@ -102,14 +103,26 @@ export function FavoritesGrid() {
   }, []);
 
   // The focus rescue runs whenever the id list changes, so it also covers the
-  // reduced-motion path, where nothing ever enters the exiting state.
+  // reduced-motion path, where nothing ever enters the exiting state. When the
+  // removal empties the store the grid is already gone, so the rescue falls back
+  // to the empty state's focusable container; with motion on it lands there once
+  // the last exiting card settles and the grid gives way. A pending rescue stays
+  // pending while only exiting cards remain, so focus never strands on the body.
   useEffect(() => {
     if (!rescueFocusRef.current) {
       return;
     }
-    rescueFocusRef.current = false;
-    gridRef.current?.focus();
-  }, [ids]);
+    const target = gridRef.current ?? emptyRef.current;
+    if (target === null) {
+      return;
+    }
+    target.focus();
+    // The list is a final target while it still owns an active card, and so is
+    // the empty state; only a grid made solely of exiting cards needs watching.
+    if (ids.length > 0 || emptyRef.current !== null) {
+      rescueFocusRef.current = false;
+    }
+  }, [ids, exitingIds]);
 
   // One bounded fallback per exiting card. It is scheduled only for cards that
   // are actually exiting, so reduced motion never arms a timer.
@@ -154,7 +167,13 @@ export function FavoritesGrid() {
     .filter(isProduct);
 
   if (active.length === 0 && leaving.length === 0) {
-    return <FavoritesEmpty />;
+    // The rescue target when the grid has given way to the empty state: focusable
+    // programmatically, never a tab stop, so a keyboard user does not trip on it.
+    return (
+      <div ref={emptyRef} tabIndex={-1} className="focus:outline-none">
+        <FavoritesEmpty />
+      </div>
+    );
   }
 
   return (
