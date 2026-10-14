@@ -13,10 +13,19 @@ export type SavedStoreState = {
 
 export const useSavedStore = create<SavedStoreState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ids: [],
-      saveForLater: (id) =>
-        set((state) => (state.ids.includes(id) ? {} : { ids: [...state.ids, id] })),
+      saveForLater: (id) => {
+        if (get().ids.includes(id)) {
+          return;
+        }
+        // The exact inverse of `moveToCart`: saving takes the line out of the
+        // cart, so a product is never in both lists and a save/move round trip
+        // cannot double its units. The cart is a separate store, so both writes
+        // happen in one action and subscribers only observe the end state.
+        useCartStore.getState().remove(id);
+        set((state) => ({ ids: [...state.ids, id] }));
+      },
       unsave: (id) => set((state) => ({ ids: state.ids.filter((value) => value !== id) })),
       moveToCart: (id) => {
         useCartStore.getState().add(id);

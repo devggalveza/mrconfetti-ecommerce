@@ -247,6 +247,8 @@ describe("CartLine", () => {
     );
 
     expect(useSavedStore.getState().ids).toEqual([shortProduct.id]);
+    // Saving for later is the inverse of moving to the cart: the line leaves it.
+    expect(useCartStore.getState().lines).toEqual([]);
   });
 
   it("shows the product name, its link, the unit price and the line subtotal", async () => {
