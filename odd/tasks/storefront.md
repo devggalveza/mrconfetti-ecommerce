@@ -532,6 +532,7 @@ snapshot-only tests.
 | 9a — help contract and logic | `773cc39` | 51 focused tests; the seven topics and their schema, the authored copy and the pure tracking rules; `ORDER_REF_PATTERN` exported once and pinned by a drift test; test-first RED recorded |
 | 9b — help sections and route | `fd6d184` | 546 tests; one sticky/rail table of contents, FAQ as native `details`, and the gated tracking panel; the verifier's sticky-placement finding and the stale-marker gap were fixed before the unit's commit |
 | 9 — phase verification | — | full web suite 52 files / 546 tests green; `bunx tsc --noEmit` clean run directly; `bun run --filter web build` green |
+| 10 — cross-cutting verification | — | see the close record below; steps 1 and 2 run, steps 3, 5, 6 and 7 owed to a human with a browser |
 
 Phase 0 delivered assets under `apps/web/public/` (logo, 3 banners, 12 product images,
 `favicon.ico`), brand tokens in `apps/web/src/index.css`, `apps/web/DESIGN_SYSTEM.md`,
@@ -885,6 +886,75 @@ Deviations found while building phase 9:
 - **Scope of `/login`.** The design's "Iniciar sesión" points at the existing scaffold
   route, which is not part of the design. If the user wants a designed login page, that is
   a new feature, not part of this one.
+- **The home page has no `h1`.** Phase 10's own accessibility pass caught it through the raw
+  server HTML: `/` renders zero `<h1>` (the hero is a carousel region, not a heading). Every
+  other route has exactly one. A screen-reader or SEO user landing on the storefront gets no
+  page heading. It is a phase 2/4 artifact, not a phase 10 one, and fixing it is a copy and
+  layout decision (visible hero heading versus a visually hidden `h1`), so it is recorded
+  rather than patched inside the close.
+
+## Phase 10 — close record
+
+The phase plan's own checklist, step by step, with what was actually executed and what was
+not. Steps 1 and 2 ran to completion; the rest need a browser and human eyes.
+
+### Step 1 — suite, types, build: run
+
+- `bun run --filter web test` — **52 files / 546 tests green**, run twice in a row (38.4 s and
+  19.3 s), no failure and no timeout in either run. The load-sensitivity recorded earlier did
+  not reproduce in serial runs.
+- `bun run check-types` — the Turbo root task: 7 packages in scope, **5 tasks / 5 successful**
+  (4 cached), `web` executing `tsc --noEmit` with no output.
+- `bun run --filter web build` — green; the SSR build emits `dist/server/assets/ayuda-*.js`.
+- `git status --porcelain --untracked-files=all` empty and `HEAD` unchanged before and after,
+  so the checks left nothing behind (`apps/web/dist` and `.turbo` are gitignored).
+
+### Step 2 — render smoke per route: run, automated
+
+The dev server (`bunx vite dev --port 4321`) was fetched with `curl` for all seven routes, so
+every marker below was present in **un-executed** server HTML, not injected by JavaScript.
+
+| Route | Status | Server-rendered evidence |
+| --- | --- | --- |
+| `/` | 200 | hero region, 7 category links, 87 product cards — and **0 `<h1>`** |
+| `/products` | 307 → `?sort=rel&page=1` → 200 | `<h1>Todos los productos</h1>`, results section, 12 cards |
+| `/products/1` | 200 | product `h1`, `Añadir al carrito` controls |
+| `/cart` | 200 | `<h1>Tu carrito</h1>`, exactly 1 `role="status"`, no persisted section |
+| `/favoritos` | 200 | `<h1>Tus favoritos</h1>`, exactly 1 `role="status"` |
+| `/checkout` | 200 | checkout shell: `h1`, the steps header and 1 `role="status"` |
+| `/ayuda` | 200 | `<h1>Centro de ayuda</h1>`, the TOC label, the seven anchors, 7 `details`, 1 `role="status"` |
+
+`/ayuda?tema=pedido` returns exactly one `aria-current="location"`, on `#pedido`;
+`/ayuda?tema=pizza` canonicalises to `/ayuda` and marks none, which is the contract: an unknown
+topic is stripped, not rejected. The only dev-server error was a pre-existing `ECONNRESET`
+during dependency pre-bundling, before any route request; no request produced an SSR error.
+The server was killed and the port closed afterwards, with the tree byte-identical.
+
+### Steps 3-7 — owed to a human with a browser
+
+- **3. Responsive pass at 1240 / 1024 / 768 / 480** — not run: no browser harness exists in
+  this environment, and jsdom has no layout engine. This also leaves the sticky table of
+  contents, the chip rail below 768px and the `py-1` focus-ring room read from CSS semantics.
+- **4. Accessibility pass** — partially run, from the raw HTML only: `alt` text, icon-only
+  `aria-label`s, the 44px classes and the single-`h1` rule were checked (and the missing home
+  `h1` caught), but focus order, keyboard paths through the carousel, sheet, dialogs and tabs,
+  and the focus-visible ring are not observable without a browser.
+- **5. Reduced-motion pass** — not run: it needs a browser with the preference set. The code
+  paths exist (carousel autoplay, rail scrolling, the help deep-link scroll) and two of them
+  are unit-tested with the preference mocked, which is not the same as seeing them.
+- **6. Persistence pass across reload and two tabs** — not run: needs a browser. The store
+  tests cover the persisted shapes; multi-tab sync is untested.
+- **7. Visual comparison against each source HTML page** — still impossible: the design
+  sources do not exist on this machine or in the git history, as recorded under open risks.
+- **8. Record every commit id** — done: the progress log above and the unit tables carry every
+  commit of the feature.
+
+### Delivery
+
+On the user's explicit instruction, `feat/storefront` was fast-forwarded into `main`. `main`
+was an ancestor (`0 38` divergence) and the repository has no remote configured, so no merge
+commit was created and nothing was pushed. The branch tip and the `main` tip are the same
+commit, which is this document's last commit.
 - **Phase 9 review size.** `fdba297..fd6d184` is 19 code files (8 of them tests), 1,726
   insertions and 7 deletions across three commits, plus the plan document. Smaller than
   phases 7 and 8, and the split is by layer (contract, sections, route) rather than by
