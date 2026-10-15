@@ -112,4 +112,73 @@ describe("SearchBar", () => {
     const input = screen.getByPlaceholderText("Buscar productos") as HTMLInputElement;
     expect(input.value).toBe("globos");
   });
+
+  it("shows the clear control only when the input has text", async () => {
+    const user = userEvent.setup();
+    await mountSearchBar();
+
+    expect(screen.queryByRole("button", { name: "Limpiar búsqueda" })).toBeNull();
+    await user.type(screen.getByPlaceholderText("Buscar productos"), "globo");
+    expect(screen.getByRole("button", { name: "Limpiar búsqueda" })).toBeTruthy();
+  });
+
+  it("clears the query without navigating or toasting and refocuses the input", async () => {
+    const user = userEvent.setup();
+    await mountSearchBar();
+    const input = screen.getByPlaceholderText("Buscar productos") as HTMLInputElement;
+
+    await user.type(input, "globo");
+    await user.click(screen.getByRole("button", { name: "Limpiar búsqueda" }));
+
+    expect(input.value).toBe("");
+    expect(screen.queryByRole("button", { name: "Limpiar búsqueda" })).toBeNull();
+    expect(toast).not.toHaveBeenCalled();
+    expect(screen.getByText("ruta:/|consulta:")).toBeTruthy();
+    expect(document.activeElement).toBe(input);
+  });
+
+  it("allows retyping and submitting after clearing", async () => {
+    const user = userEvent.setup();
+    await mountSearchBar();
+    const input = screen.getByPlaceholderText("Buscar productos");
+
+    await user.type(input, "globo");
+    await user.click(screen.getByRole("button", { name: "Limpiar búsqueda" }));
+    await user.type(input, "confeti");
+    await user.click(screen.getByRole("button", { name: "Buscar" }));
+
+    expect(await screen.findByText("ruta:/products|consulta:confeti")).toBeTruthy();
+  });
+
+  it("clears a URL-prefilled query without mutating the URL", async () => {
+    const user = userEvent.setup();
+    await mountSearchBar("/products?q=globos");
+    const input = screen.getByPlaceholderText("Buscar productos") as HTMLInputElement;
+
+    expect(input.value).toBe("globos");
+    await user.click(screen.getByRole("button", { name: "Limpiar búsqueda" }));
+
+    expect(input.value).toBe("");
+    expect(screen.getByText("ruta:/products|consulta:globos")).toBeTruthy();
+  });
+
+  it("uses larger typography, explicit cursors and hides the native search clear", async () => {
+    const user = userEvent.setup();
+    await mountSearchBar();
+    const input = screen.getByPlaceholderText("Buscar productos");
+
+    expect(input.className).toContain("text-[0.9rem]");
+    expect(input.className).toContain("md:text-[0.9rem]");
+    expect(input.className).toContain("cursor-text");
+    expect(input.className).toContain("[&::-webkit-search-cancel-button]:appearance-none");
+    expect(input.className).toContain("[&::-webkit-search-decoration]:appearance-none");
+    expect(screen.getByRole("button", { name: "Buscar" }).className).toContain("cursor-pointer");
+
+    await user.type(input, "globo");
+    const clear = screen.getByRole("button", { name: "Limpiar búsqueda" });
+    expect(clear.getAttribute("type")).toBe("button");
+    expect(clear.className).toContain("cursor-pointer");
+    expect(clear.className).toContain("size-11");
+    expect(clear.querySelector("svg")?.getAttribute("class")).toContain("size-5");
+  });
 });
