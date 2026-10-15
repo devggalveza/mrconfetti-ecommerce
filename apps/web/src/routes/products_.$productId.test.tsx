@@ -30,6 +30,7 @@ import {
 } from "@/features/catalog/data/product-detail-content";
 import { products } from "@/features/catalog/data/products";
 import { instalments, priceWithPack, quantityLimit } from "@/features/catalog/lib/product-detail";
+import { relatedProducts } from "@/features/catalog/lib/selectors";
 import { productsSearchSchema } from "@/features/catalog/schemas/products-search";
 import { MAX_QUANTITY } from "@/lib/constants";
 import { formatMoney, formatRating, formatRatingValue, formatReviewCount } from "@/lib/format";
@@ -448,7 +449,7 @@ describe("/products/$productId route", () => {
     });
   });
 
-  it("names the primary add button after its product, unlike the rail's identical labels", async () => {
+  it("names the primary add button after its product and the rail cards after theirs", async () => {
     const product = products[0];
     await renderDetail(`/products/${product.id}`);
 
@@ -469,11 +470,18 @@ describe("/products/$productId route", () => {
       }),
     ).toBe(primary);
 
-    // The rail's five cards still share the bare label; that file is not in scope.
+    // The rail's five cards each name their own product through the shared card
+    // action, so none of them collides with the primary's bare label.
     const rail = screen.getByRole("list", { name: PRODUCT_RELATED_COPY.heading });
-    expect(within(rail).getAllByRole("button", { name: PRODUCT_ADD_TO_CART_COPY.idle })).toHaveLength(
-      5,
+    const railAddButtons = within(rail).getAllByRole("button", {
+      name: /^Agregar .+ al carrito$/,
+    });
+    expect(railAddButtons.map((button) => button.textContent)).toEqual(
+      relatedProducts(products, product).map((related) => `Agregar ${related.name} al carrito`),
     );
+    expect(
+      within(rail).queryAllByRole("button", { name: PRODUCT_ADD_TO_CART_COPY.idle }),
+    ).toHaveLength(0);
   });
 
   it("names the gallery stage after the product and the zoom state", async () => {
