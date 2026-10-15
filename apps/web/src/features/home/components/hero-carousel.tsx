@@ -28,7 +28,7 @@ export function HeroCarousel() {
       aria-label={HOME_SECTION_HEADINGS.heroCarousel}
       aria-roledescription="carrusel"
       role="region"
-      className="relative min-h-[300px] overflow-hidden rounded-lg bg-surface"
+      className="relative mt-4 min-h-[300px] lg:min-h-[460px] overflow-hidden rounded-lg bg-surface"
     >
       {HERO_SLIDES.map((slide, slideIndex) => {
         const isActive = slideIndex === index;

@@ -5,9 +5,7 @@ import { BrandsShowcase } from "@/features/home/components/brands-showcase";
 import { CampaignBanners } from "@/features/home/components/campaign-banners";
 import { CategoryGrid } from "@/features/home/components/category-grid";
 import { HeroCarousel } from "@/features/home/components/hero-carousel";
-import { HeroPromoCard } from "@/features/home/components/hero-promo-card";
 import { SeasonBanner } from "@/features/home/components/season-banner";
-import { HOME_SECTION_HEADINGS } from "@/features/home/data/home-content";
 import { HOME_RAILS } from "@/features/home/data/home-rails";
 
 export const Route = createFileRoute("/")({
@@ -45,13 +43,7 @@ function RailSection({ id }: { id: string }) {
 function HomeComponent() {
   return (
     <>
-      <section
-        aria-label={HOME_SECTION_HEADINGS.heroPromotions}
-        className="mt-4 grid grid-cols-[2fr_1fr] gap-4 max-lg:grid-cols-1"
-      >
-        <HeroCarousel />
-        <HeroPromoCard />
-      </section>
+      <HeroCarousel />
 
       <CategoryGrid />
 

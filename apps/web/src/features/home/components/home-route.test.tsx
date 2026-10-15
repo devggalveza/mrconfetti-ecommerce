@@ -54,7 +54,7 @@ function railTitle(id: string): string {
  * rail heading, so DOM order is read from the region list.
  */
 const SECTION_ORDER = [
-  HOME_SECTION_HEADINGS.heroPromotions,
+  HOME_SECTION_HEADINGS.heroCarousel,
   HOME_SECTION_HEADINGS.popularCategories,
   railTitle("deals"),
   HOME_SECTION_HEADINGS.campaigns,
@@ -151,6 +151,13 @@ describe("/ route", () => {
 
     const sections = SECTION_ORDER.map((name) => screen.getByRole("region", { name }));
     expect(new Set(sections).size).toBe(SECTION_ORDER.length);
+  });
+
+  it("no longer renders the removed promo card CTA on the home hero", async () => {
+    renderHomePage();
+    await screen.findByRole("region", { name: HOME_SECTION_HEADINGS.heroCarousel });
+
+    expect(screen.queryByRole("link", { name: "Ver rebajas" })).toBeNull();
   });
 
   it("leaves no phase marker in the home feature or the index route", () => {

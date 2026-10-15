@@ -58,23 +58,6 @@ export const HERO_SLIDES: ReadonlyArray<HeroSlide> = [
   },
 ];
 
-/** The "REBAJAS / 50 %" panel beside the slider. */
-export type HeroPromo = {
-  eyebrow: string;
-  percent: number;
-  description: string;
-  ctaLabel: string;
-  href: string;
-};
-
-export const HERO_PROMO: HeroPromo = {
-  eyebrow: "REBAJAS",
-  percent: 50,
-  description: "En artículos de fiesta y todo para la temporada de graduaciones",
-  ctaLabel: "Ver rebajas",
-  href: "/products?deal=true",
-};
-
 /** A popular-category shortcut: the catalog category, its icon and its filter link. */
 export type HomeCategory = {
   category: Category;
@@ -98,7 +81,6 @@ export const HOME_CATEGORIES: ReadonlyArray<HomeCategory> = [
 
 /** The accessible names the home sections use, so labels and tests cannot drift. */
 export const HOME_SECTION_HEADINGS = {
-  heroPromotions: "Promociones destacadas",
   heroCarousel: "Banners de promociones",
   popularCategories: "Explora las categorías populares",
   campaigns: "Campañas de temporada",

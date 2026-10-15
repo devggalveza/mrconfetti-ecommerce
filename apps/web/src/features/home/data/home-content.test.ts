@@ -5,7 +5,6 @@ import { products } from "@/features/catalog/data/products";
 import { BRANDS, CATEGORIES } from "@/features/catalog/schemas/product";
 import { productsSearchSchema } from "@/features/catalog/schemas/products-search";
 import {
-  HERO_PROMO,
   HERO_SLIDES,
   HOME_BRANDS,
   HOME_CAMPAIGNS,
@@ -67,19 +66,6 @@ describe("HERO_SLIDES", () => {
   });
 });
 
-describe("HERO_PROMO", () => {
-  it("describes a 50 % sale and links to the deals filter", () => {
-    expect(HERO_PROMO.percent).toBe(50);
-    expect(HERO_PROMO.eyebrow.trim().length).toBeGreaterThan(0);
-    expect(HERO_PROMO.description.trim().length).toBeGreaterThan(0);
-    expect(HERO_PROMO.ctaLabel.trim().length).toBeGreaterThan(0);
-
-    const url = new URL(HERO_PROMO.href, "https://mrconfetti.example");
-    expect(url.pathname).toBe("/products");
-    expect(url.searchParams.get("deal")).toBe("true");
-  });
-});
-
 describe("HOME_CATEGORIES", () => {
   it("lists exactly the seven catalog categories, in `CATEGORIES` order", () => {
     expect(HOME_CATEGORIES.map((entry) => entry.category)).toEqual([...CATEGORIES]);
@@ -106,7 +92,6 @@ describe("HOME_CATEGORIES", () => {
 
 describe("HOME_SECTION_HEADINGS", () => {
   it("provides the headings this phase renders", () => {
-    expect(HOME_SECTION_HEADINGS.heroPromotions.trim().length).toBeGreaterThan(0);
     expect(HOME_SECTION_HEADINGS.heroCarousel.trim().length).toBeGreaterThan(0);
     expect(HOME_SECTION_HEADINGS.popularCategories.trim().length).toBeGreaterThan(0);
     expect(HOME_SECTION_HEADINGS.campaigns.trim().length).toBeGreaterThan(0);

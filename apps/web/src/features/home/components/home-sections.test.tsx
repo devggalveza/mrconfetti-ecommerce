@@ -15,10 +15,8 @@ import { BrandsShowcase } from "@/features/home/components/brands-showcase";
 import { CampaignBanners } from "@/features/home/components/campaign-banners";
 import { CategoryGrid } from "@/features/home/components/category-grid";
 import { HeroCarousel } from "@/features/home/components/hero-carousel";
-import { HeroPromoCard } from "@/features/home/components/hero-promo-card";
 import { SeasonBanner } from "@/features/home/components/season-banner";
 import {
-  HERO_PROMO,
   HERO_SLIDES,
   HOME_BRANDS,
   HOME_CAMPAIGNS,
@@ -43,7 +41,6 @@ const indexRoute = createRoute({
   component: () => (
     <>
       <HeroCarousel />
-      <HeroPromoCard />
       <CategoryGrid />
       <CampaignBanners />
       <BrandsShowcase />
@@ -103,16 +100,6 @@ describe("home hero", () => {
   it("offers a pause control beside the dots", async () => {
     renderHomeSections();
     expect(await screen.findByRole("button", { name: "Pausar el carrusel" })).toBeTruthy();
-  });
-
-  it("renders the promo card CTA as a link to the deals filter", async () => {
-    renderHomeSections();
-    const cta = await screen.findByRole("link", { name: HERO_PROMO.ctaLabel });
-    const href = cta.getAttribute("href") ?? "";
-    const url = new URL(href, "https://mrconfetti.example");
-
-    expect(url.pathname).toBe("/products");
-    expect(url.searchParams.get("deal")).toBe("true");
   });
 });
 
