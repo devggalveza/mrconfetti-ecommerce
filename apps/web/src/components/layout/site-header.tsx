@@ -10,7 +10,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background">
       <Container>
-        <div className="flex h-16 items-center gap-6 max-md:h-auto max-md:flex-wrap max-md:gap-2 max-md:py-2">
+        <div className="flex h-20 items-center gap-6 max-md:h-auto max-md:flex-wrap max-md:gap-2 max-md:py-4">
           <Link
             to="/"
             aria-label="Inicio Mr. Confetti"

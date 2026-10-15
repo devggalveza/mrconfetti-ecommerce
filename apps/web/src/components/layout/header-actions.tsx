@@ -7,7 +7,7 @@ import { useCartUnits } from "@/stores/cart-store";
 import { useFavoritesCount } from "@/stores/favorites-store";
 
 const chipClass =
-  "inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm font-semibold transition-colors hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+  "inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full px-3 text-sm font-semibold transition-colors hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 
 /** The header's account, favourites and cart chips. */
 export function HeaderActions() {
@@ -30,7 +30,6 @@ export function HeaderActions() {
         className={cn(chipClass, "bg-brand text-white hover:bg-brand-dark")}
       >
         <ShoppingCart className="size-5" aria-hidden="true" />
-        <span className="hidden md:inline">Carrito</span>
         <Badge variant="count">{cartUnits}</Badge>
       </Link>
     </div>

@@ -152,6 +152,36 @@ describe("shared chrome", () => {
     expect(within(cart).getByText("3")).toBeTruthy();
   });
 
+  it("keeps the account label desktop-only and the cart icon-only", async () => {
+    renderAt("/");
+    const header = await screen.findByRole("banner");
+
+    const account = within(header).getByRole("link", { name: "Iniciar sesión" });
+    const label = account.querySelector("span");
+    expect(label?.textContent).toBe("Iniciar sesión");
+    expect(label?.className).toContain("hidden");
+    expect(label?.className).toContain("md:inline");
+
+    const cart = within(header).getByRole("link", { name: "Carrito" });
+    expect(within(cart).queryByText("Carrito")).toBeNull();
+    expect(cart.querySelector("span:not([data-slot='badge'])")).toBeNull();
+    expect(within(cart).getByText("0")).toBeTruthy();
+  });
+
+  it("orders account, favourites and cart with their Spanish accessible names", async () => {
+    renderAt("/");
+    const header = await screen.findByRole("banner");
+    const account = within(header).getByRole("link", { name: "Iniciar sesión" });
+    const actions = account.parentElement as HTMLElement;
+
+    const actionLinks = within(actions).getAllByRole("link");
+    expect(actionLinks.map((link) => link.getAttribute("aria-label"))).toEqual([
+      "Iniciar sesión",
+      "Favoritos",
+      "Carrito",
+    ]);
+  });
+
   it("renders the footer link groups and the help links", async () => {
     renderAt("/");
     const footer = await screen.findByRole("contentinfo");
