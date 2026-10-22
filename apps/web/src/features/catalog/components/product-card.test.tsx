@@ -7,7 +7,7 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -46,7 +46,19 @@ function renderCard() {
     path: "/products/$productId",
     component: () => null,
   });
-  const routeTree = rootRoute.addChildren([indexRoute, productRoute]);
+  // The card's add dialog links to the cart and to checkout, so both routes have
+  // to exist on the test router for those links to resolve.
+  const cartRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/cart",
+    component: () => null,
+  });
+  const checkoutRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/checkout",
+    component: () => null,
+  });
+  const routeTree = rootRoute.addChildren([indexRoute, productRoute, cartRoute, checkoutRoute]);
   const router = createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries: ["/"] }),
@@ -104,15 +116,28 @@ describe("ProductCard", () => {
     expect(screen.queryByText("Envío gratis")).toBeNull();
   });
 
-  it("adds exactly one unit, toasts and stays on the catalogue route", async () => {
+  it("adds one unit, toasts and opens the confirmation dialog from the card", async () => {
     const user = userEvent.setup();
     const router = renderCard();
 
-    await user.click(await screen.findByRole("button", { name: ADD_NAME }));
+    const add = await screen.findByRole("button", { name: ADD_NAME });
+    expect(add.getAttribute("aria-haspopup")).toBe("dialog");
+    // Nothing is mounted until the control is used: a grid of cards must not pay
+    // for a dialog it never shows.
+    expect(screen.queryByRole("dialog")).toBeNull();
 
+    await user.click(add);
+
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByRole("heading", { name: "Añadido al carrito" })).toBeTruthy();
+    expect(within(dialog).getByText(product.name)).toBeTruthy();
+
+    // One click is the whole purchase step: the unit is in the cart before the
+    // dialog appears and no confirmation button is left to press.
     expect(useCartStore.getState().lines).toEqual([{ id: product.id, quantity: 1 }]);
     expect(selectCartUnits(useCartStore.getState())).toBe(1);
     expect(toast).toHaveBeenCalledWith("Añadido al carrito");
+    expect(within(dialog).queryByRole("button", { name: "Agregar al carrito" })).toBeNull();
     expect(router.state.location.pathname).toBe("/");
   });
 
@@ -148,13 +173,15 @@ describe("ProductCard", () => {
     expect(frame?.getAttribute("class")).toContain("bg-gray-500/40");
 
     // Both actions are the same compact icon control: a 40px square, and more
-    // rounded than the old rounded-md pill without becoming a full circle.
+    // rounded than the old rounded-md pill without becoming a full circle. Both
+    // are clickable controls, so both must show the hand cursor.
     for (const control of [add, view]) {
       const controlClass = control.getAttribute("class") ?? "";
       expect(controlClass).toContain("size-10");
       expect(controlClass).toContain("rounded-xl");
       expect(controlClass).toContain("bg-white");
       expect(controlClass).toContain("border-gray-200");
+      expect(controlClass).toContain("cursor-pointer");
       expect(controlClass).not.toContain("h-10");
       expect(controlClass).not.toContain("rounded-md");
       expect(controlClass).not.toContain("px-4");
