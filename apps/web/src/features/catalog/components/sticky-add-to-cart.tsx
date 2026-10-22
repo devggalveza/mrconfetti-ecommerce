@@ -65,7 +65,7 @@ export function StickyAddToCart({
       aria-hidden={!isVisible}
       inert={!isVisible}
       className={cn(
-        "bg-background border-border fixed inset-x-0 bottom-0 z-30 hidden items-center gap-4 border-t px-4 py-2 transition-transform duration-200 ease-out motion-reduce:transition-none max-md:flex",
+        "bg-background border-border fixed inset-x-0 bottom-0 z-40 hidden items-center gap-4 border-t px-4 py-2 transition-transform duration-200 ease-out motion-reduce:transition-none max-md:flex",
         isVisible ? "translate-y-0" : "translate-y-full",
       )}
     >

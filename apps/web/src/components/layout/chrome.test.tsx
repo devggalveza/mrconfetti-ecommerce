@@ -14,9 +14,17 @@ import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { CheckoutHeader } from "@/components/layout/checkout-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { ProductCard } from "@/features/catalog/components/product-card";
+import { products } from "@/features/catalog/data/products";
 import { productsSearchSchema } from "@/features/catalog/schemas/products-search";
 import { parseSearchParams, stringifySearchParams } from "@/lib/search-params";
 import { useCartStore } from "@/stores/cart-store";
+
+/** The Tailwind `z-<n>` step a node declares, or 0 when it declares none. */
+function zIndexOf(element: Element): number {
+  const match = (element.getAttribute("class") ?? "").match(/(?:^|\s)z-(\d+)(?:\s|$)/);
+  return match?.[1] === undefined ? 0 : Number(match[1]);
+}
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -81,6 +89,17 @@ const breadcrumbsRoute = createRoute({
   ),
 });
 
+/** A page whose content floats controls over an image, like the real grid does. */
+const stackingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/stacking",
+  component: () => {
+    const product = products[0];
+    if (product === undefined) throw new Error("test fixture expects at least one product");
+    return <ProductCard product={product} />;
+  },
+});
+
 const checkoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/checkout-preview",
@@ -96,6 +115,7 @@ const routeTree = rootRoute.addChildren([
   ayudaRoute,
   breadcrumbsRoute,
   checkoutRoute,
+  stackingRoute,
 ]);
 
 function renderAt(path: string) {
@@ -118,7 +138,7 @@ afterEach(() => {
 });
 
 describe("shared chrome", () => {
-  it("renders the nine category links in the header", async () => {
+  it("renders the nine category links in the home header", async () => {
     renderAt("/");
     const header = await screen.findByRole("banner");
     const nav = within(header).getByRole("navigation", { name: "Categorías" });
@@ -128,20 +148,47 @@ describe("shared chrome", () => {
     expect(links[1]?.getAttribute("href")).toBe("/products?cat=Graduaci%C3%B3n");
   });
 
-  it("activates only the link whose search matches the URL exactly", async () => {
-    renderAt("/products?cat=Globos");
+  it("renders the announcement strip above the sticky header, not inside it", async () => {
+    renderAt("/");
+    const bar = await screen.findByRole("complementary", { name: "Anuncios" });
     const header = await screen.findByRole("banner");
-    const nav = within(header).getByRole("navigation", { name: "Categorías" });
-    const active = nav.querySelectorAll('[aria-current="page"]');
-    expect(active).toHaveLength(1);
-    expect(active[0]?.textContent).toBe("Globos");
+
+    expect(header.contains(bar)).toBe(false);
+    expect(bar.compareDocumentPosition(header) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it("leaves every category link inactive on an unrelated search", async () => {
+  it("keeps the sticky header above the floating controls of the page content", async () => {
+    renderAt("/stacking");
+    const header = await screen.findByRole("banner");
+    const product = products[0];
+    if (product === undefined) throw new Error("test fixture expects at least one product");
+    const favourite = await screen.findByRole("button", {
+      name: `Añadir ${product.name} a favoritos`,
+    });
+
+    // The card control floats over its own image, but never over the chrome: a tie
+    // would let the later node in the DOM win, which is exactly the scroll bug.
+    expect(zIndexOf(favourite)).toBeGreaterThan(0);
+    expect(zIndexOf(header)).toBeGreaterThan(zIndexOf(favourite));
+  });
+
+  it("keeps the search bar and the account chips on every route", async () => {
+    renderAt("/products?cat=Globos");
+    const header = await screen.findByRole("banner");
+    expect(within(header).getByRole("search")).toBeTruthy();
+    expect(within(header).getByRole("link", { name: "Carrito" })).toBeTruthy();
+  });
+
+  it("hides the category rail outside the home page", async () => {
+    renderAt("/products?cat=Globos");
+    const header = await screen.findByRole("banner");
+    expect(within(header).queryByRole("navigation", { name: "Categorías" })).toBeNull();
+  });
+
+  it("hides the category rail on a filtered products listing", async () => {
     renderAt("/products?q=globo");
     const header = await screen.findByRole("banner");
-    const nav = within(header).getByRole("navigation", { name: "Categorías" });
-    expect(nav.querySelectorAll('[aria-current="page"]')).toHaveLength(0);
+    expect(within(header).queryByRole("navigation", { name: "Categorías" })).toBeNull();
   });
 
   it("shows the cart store unit count in the cart badge", async () => {

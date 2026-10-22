@@ -9,7 +9,7 @@ const STEPS = ["Carrito", "Envío y pago", "Confirmación"] as const;
 /** The checkout variant of the header: logo, three-step indicator and secure note. */
 export function CheckoutHeader({ currentStep }: { currentStep: 1 | 2 | 3 }) {
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-background">
+    <header className="sticky top-0 z-30 border-b border-border bg-background">
       <Container>
         <div className="flex h-16 items-center gap-6">
           <Link
