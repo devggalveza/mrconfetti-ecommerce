@@ -80,6 +80,10 @@ The spacing scale in use is **4 / 8 / 16 / 24 / 32 px** (`gap-1`, `gap-2`, `gap-
 - Max content width **1240px**, centered.
 - **16px** gutters on the sides at every breakpoint.
 - Product grid: **5 columns** with **16px** gaps at desktop.
+- **Announcement bar**: a full-width `--brand` strip with white text, **36px** minimum height,
+  sitting above the sticky header. It rotates one message every **5s** and holds the first message
+  under `prefers-reduced-motion: reduce`. It is deliberately not sticky: it scrolls away while the
+  header stays pinned.
 
 ## Surfaces
 
@@ -88,6 +92,24 @@ The spacing scale in use is **4 / 8 / 16 / 24 / 32 px** (`gap-1`, `gap-2`, `gap-
 - Sections and cards sit on white (`--background` / `--card`).
 - The only edges are **1px `--border` hairlines** on inputs, chips and product image frames.
 - Category circles use `--surface`.
+- **Modals** pad their content by the **24px** step (`p-6`) so no text sits against the border, and
+  inset the close control by **16px** (`top-4 right-4`) with the header reserving its 44px box
+  (`pr-16`). The dialog's `DialogFooter` bleeds to the edges with `-mx-6 -mb-6` to match.
+
+## Stacking
+
+One documented scale, monotonically increasing. Never reuse a step for two different layers: two nodes
+at the same `z-` step resolve by DOM order, which is how an in-card control ends up painting over the
+sticky header while scrolling.
+
+| Step | Layer | Examples |
+| --- | --- | --- |
+| `z-1` | Badges inside an image | Discount badge in the product gallery. |
+| `z-10` | Overlays owned by one content block | Card hover overlay, rail arrows, carousel dots. |
+| `z-20` | Floating controls inside content | The card's favourite button. |
+| `z-30` | Sticky chrome | Site header, checkout header. |
+| `z-40` | Fixed viewport CTA | The mobile add-to-cart bar on product detail. |
+| `z-50` | Modal overlays | Dialog, alert dialog, sheet, dropdown menu. |
 
 ## Interaction
 

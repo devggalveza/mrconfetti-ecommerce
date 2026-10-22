@@ -305,6 +305,8 @@ describe("/checkout chrome", () => {
     await renderCheckout("/cart");
 
     expect(await screen.findByRole("banner")).toBeTruthy();
-    expect(screen.getByRole("navigation", { name: "Categorías" })).toBeTruthy();
+    // The category rail belongs to the home page, so the cart header keeps only
+    // the search bar and the account chips.
+    expect(screen.queryByRole("navigation", { name: "Categorías" })).toBeNull();
   });
 });

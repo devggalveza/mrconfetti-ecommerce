@@ -1,13 +1,17 @@
 import { Link } from "@tanstack/react-router";
 import { Eye, ShoppingCart } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { PRODUCT_ADD_TO_CART_COPY } from "@/features/catalog/data/product-detail-content";
+import { quantityLimit } from "@/features/catalog/lib/product-detail";
 import type { Product } from "@/features/catalog/schemas/product";
 import { FavoriteButton } from "@/features/favorites/components/favorite-button";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/stores/cart-store";
 
+import { AddToCartDialog } from "./add-to-cart-dialog";
 import { ProductPrice } from "./product-price";
 import { ProductRating } from "./product-rating";
 
@@ -27,7 +31,6 @@ type ProductCardProps = {
 const PRODUCT_CARD_ACTION_COPY = {
   view: "Ver",
   add: "Agregar",
-  toast: "Añadido al carrito",
 } as const;
 
 /**
@@ -70,26 +73,37 @@ const OVERLAY_CONTROL_REVEAL = cn(
  * own background so the pair reads as one cluster over the grey backdrop.
  */
 const OVERLAY_ICON_CONTROL_CLASS = cn(
-  "inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white p-0 text-gray-900 transition-colors hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
+  "inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white p-0 text-gray-900 transition-colors hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
   OVERLAY_CONTROL_REVEAL,
 );
 
 /**
  * The storefront product card: image frame, favourite toggle, title, rating, price
  * and the optional free-shipping line. It owns only the two image-frame actions —
- * an eye-icon link to the detail route and a cart-icon one-unit add — and knows
- * nothing about grid or rail sizing. Both are icon-only squares whose wording lives
- * in visually hidden text, so a screen reader still hears the verb and the product.
- * Buying in quantity still happens on the detail route.
+ * an eye-icon link to the detail route and a cart-icon button that adds one unit and
+ * opens the confirmation dialog — and knows nothing about grid or rail sizing. Both
+ * are icon-only squares whose wording lives in visually hidden text, so a screen
+ * reader still hears the verb and the product.
+ *
+ * The cart control is the whole purchase step: the unit is written here, before the
+ * dialog opens, so a shopper who already knows what they want pays one click less,
+ * and the dialog only reports the write and offers the ways out. A sold-out product
+ * writes nothing and the dialog says so.
  */
 export function ProductCard({ product, className, priority = false }: ProductCardProps) {
   const productId = String(product.id);
   const addToCart = useCartStore((state) => state.add);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-  const handleAdd = (): void => {
-    addToCart(product.id, 1);
-    toast(PRODUCT_CARD_ACTION_COPY.toast);
-  };
+  const limit = quantityLimit(product);
+
+  function handleAddClick(): void {
+    if (limit > 0) {
+      addToCart(product.id, 1);
+      toast(PRODUCT_ADD_TO_CART_COPY.toast);
+    }
+    setIsAddDialogOpen(true);
+  }
 
   return (
     <article className={cn("relative flex min-w-0 flex-col gap-2 bg-background", className)}>
@@ -125,7 +139,8 @@ export function ProductCard({ product, className, priority = false }: ProductCar
             type="button"
             variant="outline"
             size="sm"
-            onClick={handleAdd}
+            aria-haspopup="dialog"
+            onClick={handleAddClick}
             className={cn(OVERLAY_ICON_CONTROL_CLASS, "min-w-0 shadow-none hover:text-gray-900")}
           >
             <ShoppingCart aria-hidden="true" className="size-5" />
@@ -154,6 +169,15 @@ export function ProductCard({ product, className, priority = false }: ProductCar
 
       {product.freeShipping ? (
         <p className="mt-auto text-xs font-semibold text-success">Envío gratis</p>
+      ) : null}
+
+      {isAddDialogOpen ? (
+        <AddToCartDialog
+          product={product}
+          onClose={() => {
+            setIsAddDialogOpen(false);
+          }}
+        />
       ) : null}
     </article>
   );

@@ -80,6 +80,14 @@ function filesContaining(files: readonly string[], marker: string): string[] {
     .map((file) => file.slice(WEB_SRC.length + 1).replaceAll("\\", "/"));
 }
 
+/**
+ * First-commit budget for the assertions below. `/` mounts every rail and its
+ * cards, so its first commit is far heavier than any other route's; under a
+ * parallel `vitest run` the default 1s `findByRole` budget is not enough. These
+ * assertions are about the order and the count of the sections, not about speed.
+ */
+const FIRST_RENDER_TIMEOUT_MS = 5000;
+
 /** Renders the real `/` route component inside a memory router. */
 function renderHomePage(): void {
   const rootRoute = createRootRoute({
@@ -130,7 +138,11 @@ afterEach(() => {
 describe("/ route", () => {
   it("renders the ten sections in the order the design shows them", async () => {
     renderHomePage();
-    await screen.findByRole("region", { name: SECTION_ORDER[0] });
+    await screen.findByRole(
+      "region",
+      { name: SECTION_ORDER[0] },
+      { timeout: FIRST_RENDER_TIMEOUT_MS },
+    );
 
     for (let index = 0; index < SECTION_ORDER.length - 1; index += 1) {
       const currentName = SECTION_ORDER[index];
@@ -147,7 +159,11 @@ describe("/ route", () => {
 
   it("renders one region per section of the design", async () => {
     renderHomePage();
-    await screen.findByRole("region", { name: SECTION_ORDER[0] });
+    await screen.findByRole(
+      "region",
+      { name: SECTION_ORDER[0] },
+      { timeout: FIRST_RENDER_TIMEOUT_MS },
+    );
 
     const sections = SECTION_ORDER.map((name) => screen.getByRole("region", { name }));
     expect(new Set(sections).size).toBe(SECTION_ORDER.length);
@@ -155,7 +171,11 @@ describe("/ route", () => {
 
   it("no longer renders the removed promo card CTA on the home hero", async () => {
     renderHomePage();
-    await screen.findByRole("region", { name: HOME_SECTION_HEADINGS.heroCarousel });
+    await screen.findByRole(
+      "region",
+      { name: HOME_SECTION_HEADINGS.heroCarousel },
+      { timeout: FIRST_RENDER_TIMEOUT_MS },
+    );
 
     expect(screen.queryByRole("link", { name: "Ver rebajas" })).toBeNull();
   });
